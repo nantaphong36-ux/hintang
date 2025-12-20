@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TANYA SMART FARM V17.1 (Visual Automation)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+        :root { 
+            --danger: #ff4d4d; --warning: #f39c12; --success: #00f2fe; --primary: #4facfe; --ai-purple: #a855f7;
+            --bg: #0b0f19; --card: rgba(30, 41, 59, 0.7); --text: #f8fafc; --border: rgba(255,255,255,0.1);
+        }
+        body.light-mode { 
+            --bg: #f1f5f9; --card: rgba(255, 255, 255, 0.9); --text: #1e293b; --border: rgba(0,0,0,0.1);
+            --primary: #0284c7; --success: #0891b2; --ai-purple: #7c3aed;
+        }
+        * { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 8px; transition: 0.3s; font-size: 13px; }
+        
+        .main-header { text-align: center; padding: 10px 0 2px; margin-top: 38px; }
+        .main-header h1 { margin: 0; font-size: 20px; font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        
+        .sys-status { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--card); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); backdrop-filter: blur(15px); font-size: 9px; }
+        .online-dot { height: 7px; width: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        
+        .theme-toggle { position: fixed; bottom: 15px; right: 15px; z-index: 1001; background: var(--primary); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        
+        .dashboard-container { display: flex; flex-direction: column; gap: 10px; max-width: 1400px; margin: 0 auto; }
+        
+        /* Vision Card & Camera Controls */
+        .vision-card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 10px; }
+        .cam-container { width: 100%; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .cam-container img { width: 100%; height: 100%; object-fit: cover; }
+        .cam-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 20px; font-size: 10px; color: var(--success); border: 1px solid var(--border); }
+        .cam-btn-group { padding: 10px; display: flex; gap: 8px; background: rgba(0,0,0,0.2); }
+
+        .weather-panel { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; }
+        .ai-panel { background: var(--card); border-radius: 18px; padding: 14px; border: 1px solid var(--border); border-left: 5px solid var(--ai-purple); font-size: 12px; }
+        
+        .sensor-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        @media (min-width: 600px) { .sensor-group { grid-template-columns: repeat(4, 1fr); } }
+        
+        .s-card { background: var(--card); border-radius: 15px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+        .s-card i { font-size: 20px; margin-bottom: 6px; display: block; }
+        .s-card .val { font-size: 20px; font-weight: 900; display: block; }
+        .s-card .unit { font-size: 10px; opacity: 0.8; display: block; }
+
+        .sw-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .btn-sw { background: rgba(100,100,100,0.1); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: var(--text); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; transition: 0.3s; }
+        .btn-full { grid-column: span 2; }
+        
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 0 5px; }
+        .btn-export { background: var(--success); color: #0b0f19; border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; cursor: pointer; }
+
+        .chart-wrapper { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid var(--border); height: 250px; margin-bottom: 10px; }
+        .footer-credit { text-align: center; padding: 20px 0 60px; font-size: 10px; opacity: 0.5; letter-spacing: 0.5px; }
+
+        @media (min-width: 992px) { .dashboard-container { flex-direction: row; } .col-left { flex: 1.1; } .col-right { flex: 0.9; } }
+    </style>
+</head>
+<body>
+
+    <div class="sys-status">
+        <div><span class="online-dot" id="stat-dot"></span> <span id="stat-text">กำลังเชื่อมต่อ...</span></div>
+        <div id="real-time">--:--:--</div>
+        <div style="font-size: 8px;">📍 ท่าม่วง จ.กาญจนบุรี</div>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-adjust"></i></button>
+
+    <div class="main-header">
+        <h1>🌿 TANYA SMART FARM</h1>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="col-left">
+            
+            <div class="vision-card">
+                <div class="cam-container">
+                    <span class="cam-label" id="cam-status-tag"><i class="fas fa-video"></i> LIVE VIEW</span>
+                    <img id="farm-cam" src="http://192.168.1.184/" alt="Camera Stream">
+                    <div id="cam-off-msg" style="display:none; color:#666; flex-direction:column; align-items:center;">
+                        <i class="fas fa-video-slash" style="font-size:40px; margin-bottom:10px;"></i>
+                        <span>กล้องปิดอยู่ (Standby)</span>
+                    </div>
+                </div>
+                <div class="cam-btn-group">
+                    <button class="btn-sw" id="toggle-cam-btn" onclick="toggleCam()" style="background: var(--primary); color: white; flex:1.5;">
+                        <i class="fas fa-power-off"></i> กล้อง: <span id="cam-btn-text">เปิด</span>
+                    </button>
+                    <button class="btn-sw" onclick="refreshCam()" style="flex:1;">
+                        <i class="fas fa-sync-alt"></i> รีเฟรช
+                    </button>
+                    <button class="btn-sw" id="flash-btn" onclick="toggleFlash()" style="flex:1;">
+                        <i class="fas fa-lightbulb"></i> ไฟ: <span id="flash-text">ปิด</span>
+                    </button>
+                    <button class="btn-sw" onclick="window.open('http://192.168.1.184/', '_blank')" style="background: var(--danger); color: white;">
+                    <i class="fas fa-external-link-alt"></i> ดูผ่าน Browser โดยตรง
+                </button>
+                </div>
+            </div>
+
+            <div class="weather-panel" style="margin-bottom:10px;">
+                <img id="w-icon-img" src="" style="width: 50px; height: 50px; display: none;">
+                <i id="w-icon-placeholder" class="fas fa-cloud-sun" style="font-size: 35px; color: var(--primary);"></i>
+                <div style="text-align: center;">
+                    <div style="font-size: 26px; font-weight: 900;" id="w-temp">--°C</div>
+                    <div style="font-size: 12px; font-weight: bold; color: var(--primary);" id="w-desc">โหลดพยากรณ์...</div>
+                </div>
+                <div style="font-size: 10px;">
+                    <div><i class="fas fa-tint"></i> ภายนอก: <span id="w-hum">--</span>%</div>
+                    <div><i class="fas fa-wind"></i> ลม: <span id="w-wind">--</span> m/s</div>
+                </div>
+            </div>
+
+            <div class="ai-panel" style="margin-bottom:10px;">
+                <div style="display:flex; align-items:center; margin-bottom:6px; color:var(--ai-purple); font-weight:900;">
+                    <i class="fas fa-brain" style="margin-right:6px;"></i> การวิเคราะห์โดย VISION AI
+                </div>
+                <div id="ai-alert-area"></div>
+            </div>
+
+            <div class="sensor-group">
+                <div class="s-card"><i class="fas fa-thermometer-half" id="ic-1"></i><span class="val" id="val-1">--</span><span class="unit">อุณหภูมิ (°C)</span></div>
+                <div class="s-card"><i class="fas fa-tint" id="ic-2"></i><span class="val" id="val-2">--</span><span class="unit">ชื้นอากาศ (%)</span></div>
+                <div class="s-card"><i class="fas fa-seedling" id="ic-4"></i><span class="val" id="val-4">--</span><span class="unit">ชื้นดิน (%)</span></div>
+                <div class="s-card"><i class="fas fa-leaf" id="ic-3"></i><span class="val" id="val-3">--</span><span class="unit">ค่า VPD (kPa)</span></div>
+                <div class="s-card"><i class="fas fa-wind" id="ic-5"></i><span class="val" id="val-5">--</span><span class="unit">ก๊าซ eCO2 (ppm)</span></div>
+                <div class="s-card"><i class="fas fa-vial" id="ic-6"></i><span class="val" id="val-6">--</span><span class="unit">สารระเหย (ppb)</span></div>
+                <div class="s-card"><i class="fas fa-cloud-showers-heavy" id="ic-7"></i><span class="val" id="val-7">--</span><span class="unit">ตรวจจับฝน (%)</span></div>
+                <div class="s-card"><i class="fas fa-sun" id="ic-8"></i><span class="val" id="val-8">--</span><span class="unit">แสงสว่าง (%)</span></div>
+            </div>
+        </div>
+
+        <div class="col-right">
+            <div style="margin-bottom:15px;">
+                <div class="sw-grid">
+                    <button class="btn-sw btn-full" id="btn-V34" onclick="btnAction('V34')"><i class="fas fa-robot"></i> <span id="text-V34">โหมดอัตโนมัติ</span></button>
+                    <button class="btn-sw" id="btn-V14" onclick="btnAction('V14')"><i class="fas fa-warehouse"></i> หลังคา</button>
+                    <button class="btn-sw" id="btn-V28" onclick="btnAction('V28')"><i class="fas fa-faucet-drip"></i> ปั๊มน้ำ 1</button>
+                    <button class="btn-sw" id="btn-V29" onclick="btnAction('V29')"><i class="fas fa-droplet"></i> ปั๊มน้ำ 2</button>
+                    <button class="btn-sw" id="btn-V12" onclick="btnAction('V12')"><i class="fas fa-lightbulb"></i> ไฟในฟาร์ม</button>
+                </div>
+            </div>
+            
+            <div class="chart-header">
+                <span style="font-size: 11px; font-weight: bold; color: var(--primary);">สถิติ (30 รายการล่าสุด)</span>
+                <button class="btn-export" onclick="exportToCSV()"><i class="fas fa-file-excel"></i> EXPORT CSV</button>
+            </div>
+            <div class="chart-wrapper" id="chart-env"></div>
+            <div class="chart-wrapper" id="chart-soil"></div>
+            <div class="chart-wrapper" id="chart-air"></div>
+        </div>
+    </div>
+
+    <div class="footer-credit">
+        Powered by Tanapong & Gemini AI | Tanya Smart Farm V17.1 Fusion
+    </div>
+
+<script>
+    const tsKey = "YEYGJ3V1CV8V6OEY", tsCID = "2687634", bBase = "http://blynk2.iot-cm.com:8080/YAZf3_nX5i3sx32pFKNk6t3GBHfy4U_l", weatherKey = "02868cd5e15cf0f70bfe001a9822c367", cityID = "1153081";
+    let rawFeeds = []; 
+    let weatherData = { desc: "", hum: 0 };
+    let isCamOn = true;
+    let isFlashOn = false;
+    const camBaseURL = "http://192.168.1.184/";
+
+    function toggleTheme() { $('body').toggleClass('light-mode'); }
+    
+    // --- ฟังก์ชันควบคุมกล้อง V17.1 ---
+    function toggleCam() {
+        isCamOn = !isCamOn;
+        const btn = document.getElementById('toggle-cam-btn');
+        const camImg = document.getElementById('farm-cam');
+        const offMsg = document.getElementById('cam-off-msg');
+        if (isCamOn) {
+            camImg.src = camBaseURL + "?t=" + new Date().getTime();
+            $(camImg).show(); $(offMsg).hide();
+            btn.style.background = "var(--primary)";
+            document.getElementById('cam-btn-text').innerText = "เปิด";
+            document.getElementById('cam-status-tag').style.color = "var(--success)";
+        } else {
+            camImg.src = "";
+            $(camImg).hide(); $(offMsg).css('display', 'flex');
+            btn.style.background = "rgba(100,100,100,0.1)";
+            document.getElementById('cam-btn-text').innerText = "ปิด";
+            document.getElementById('cam-status-tag').style.color = "#666";
+        }
+    }
+
+    function refreshCam() {
+        if (!isCamOn) return;
+        document.getElementById('farm-cam').src = camBaseURL + "?t=" + new Date().getTime();
+    }
+
+    function toggleFlash() {
+        isFlashOn = !isFlashOn;
+        const state = isFlashOn ? "on" : "off";
+        const btn = document.getElementById('flash-btn');
+        fetch(`${camBaseURL}led?status=${state}`).then(() => {
+            if (isFlashOn) {
+                btn.style.background = "var(--warning)";
+                btn.style.color = "#000";
+                document.getElementById('flash-text').innerText = "เปิด";
+            } else {
+                btn.style.background = "rgba(100,100,100,0.1)";
+                btn.style.color = "var(--text)";
+                document.getElementById('flash-text').innerText = "ปิด";
+            }
+        }).catch(() => alert("กรุณาอัปเกรดโค้ด Arduino"));
+    }
+
+    // --- ระบบข้อมูลและกราฟ ---
+    function setIconColor(id, val, minOk, maxOk, dangerHigh) {
+        let color = "var(--success)";
+        if (val > maxOk || val < minOk) color = "var(--warning)";
+        if (val >= dangerHigh) color = "var(--danger)";
+        $(id).css("color", color);
+    }
+
+    const chartStyle = (id, title, series) => Highcharts.chart(id, {
+        chart: { type: 'areaspline', backgroundColor: 'transparent', height: 250 },
+        title: { text: title, style: {color:'var(--primary)', fontSize:'11px', fontWeight:'900'} },
+        xAxis: { type: 'datetime', labels: {style: {color: '#64748b', fontSize:'8px'}} },
+        yAxis: { title: null, labels: {style: {color: '#64748b', fontSize:'8px'}} },
+        series: series, credits: false, plotOptions: { areaspline: { fillOpacity: 0.1, lineWidth: 2, marker: { enabled: false } } }
+    });
+
+    const cEnv = chartStyle('chart-env', 'บรรยากาศ', [{name:'อุณหภูมิ', color:'#ff4d4d'}, {name:'ความชื้น', color:'#4facfe'}]);
+    const cSoil = chartStyle('chart-soil', 'ดิน และ VPD', [{name:'ชื้นดิน', color:'#2ecc71'}, {name:'VPD', color:'#9b59b6'}]);
+    const cAir = chartStyle('chart-air', 'อากาศ และ ฝน', [{name:'eCO2', color:'#f1c40f'}, {name:'น้ำฝน', color:'#00f2fe'}, {name:'VOC', color:'#14b8a6'}]);
+
+    function loadData() {
+        $.getJSON(`https://api.thingspeak.com/channels/${tsCID}/feeds.json?api_key=${tsKey}&results=30`, function(data) {
+            rawFeeds = data.feeds; 
+            let last = data.feeds[data.feeds.length - 1];
+            const v = [parseFloat(last.field1), parseFloat(last.field2), parseFloat(last.field3), parseFloat(last.field4), parseFloat(last.field5), parseFloat(last.field6), parseFloat(last.field7), parseFloat(last.field8)];
+            
+            v.forEach((val, i) => $(`#val-${i+1}`).text(val.toFixed(i===2?2:0)));
+            setIconColor("#ic-1", v[0], 22, 32, 35); setIconColor("#ic-2", v[1], 50, 80, 95);
+            setIconColor("#ic-4", v[3], 40, 75, 95); setIconColor("#ic-3", v[2], 0.5, 1.5, 2.0);
+
+            let alerts = "";
+            if (v[6] > 15) alerts += "<div style='color:red; font-weight:bold;'>🌧️ ฝนตก: ตรวจสอบกล้องและปิดหลังคา!</div>";
+            if (v[7] > 85) alerts += "<div style='color:#00f2fe;'>☀️ แดดแรง: เช็คอาการพืชผ่านกล้อง</div>";
+            $("#ai-alert-area").html(alerts || "<div style='color:var(--success);'>✅ Visual AI: ปกติ</div>");
+
+            let t=[], h=[], s=[], vpd=[], co=[], r=[], voc=[];
+            data.feeds.forEach(f => {
+                let x = new Date(f.created_at).getTime();
+                t.push([x, parseFloat(f.field1)]); h.push([x, parseFloat(f.field2)]);
+                vpd.push([x, parseFloat(f.field3)]); s.push([x, parseFloat(f.field4)]);
+                co.push([x, parseFloat(f.field5)]); r.push([x, parseFloat(f.field7)]); voc.push([x, parseFloat(f.field6)]);
+            });
+            cEnv.series[0].setData(t); cEnv.series[1].setData(h);
+            cSoil.series[0].setData(s); cSoil.series[1].setData(vpd);
+            cAir.series[0].setData(co); cAir.series[1].setData(r); cAir.series[2].setData(voc);
+            
+            $("#stat-text").text((new Date() - new Date(last.created_at))/60000 < 5 ? "ออนไลน์" : "ออฟไลน์");
+            $("#stat-dot").css("background", (new Date() - new Date(last.created_at))/60000 < 5 ? "var(--success)" : "red");
+        });
+    }
+
+    function exportToCSV() {
+        if (rawFeeds.length === 0) return;
+        let csvContent = "\uFEFFวันที่/เวลา,อุณหภูมิ,ความชื้นอากาศ,VPD,ความชื้นดิน,eCO2,VOC,น้ำฝน,แสงสว่าง\n";
+        rawFeeds.forEach(f => {
+            csvContent += `${new Date(f.created_at).toLocaleString('th-TH')},${f.field1},${f.field2},${f.field3},${f.field4},${f.field5},${f.field6},${f.field7},${f.field8}\n`;
+        });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `TanyaFarm_Data_${new Date().toLocaleDateString()}.csv`;
+        link.click();
+    }
+
+    function sync() {
+        ['V34', 'V14', 'V28', 'V29', 'V12'].forEach(p => {
+            fetch(`${bBase}/get/${p}`).then(res => res.json()).then(d => {
+                const val = parseInt(d[0]); const btn = $(`#btn-${p}`);
+                if (p === 'V34') {
+                    if (val === 0) { btn.css("background","var(--ai-purple)").css("color","white"); $("#text-V34").text("โหมด: อัตโนมัติ"); }
+                    else { btn.css("background","rgba(100,100,100,0.1)").css("color","var(--text)"); $("#text-V34").text("โหมด: ปรับเอง"); }
+                } else {
+                    btn.css("background", val === 1 ? "var(--primary)" : "rgba(100,100,100,0.1)").css("color", val === 1 ? "white" : "var(--text)");
+                }
+            });
+        });
+    }
+
+    function btnAction(pin) {
+        fetch(`${bBase}/get/${pin}`).then(res => res.json()).then(d => {
+            fetch(`${bBase}/update/${pin}?value=${parseInt(d[0]) === 0 ? 1 : 0}`).then(() => { setTimeout(sync, 500); });
+        });
+    }
+
+    function getWeather() {
+        $.getJSON(`https://api.openweathermap.org/data/2.5/weather?id=${cityID}&appid=${weatherKey}&units=metric`, function(data) {
+            $("#w-temp").text(Math.round(data.main.temp) + "°C");
+            $("#w-desc").text(data.weather[0].description);
+            $("#w-hum").text(data.main.humidity); 
+            $("#w-wind").text(data.wind.speed);
+            $("#w-icon-img").attr("src", `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`).show();
+            $("#w-icon-placeholder").hide();
+        });
+    }
+
+    setInterval(loadData, 15000); setInterval(sync, 5000); setInterval(getWeather, 600000);
+    setInterval(() => $("#real-time").text(new Date().toLocaleTimeString('th-TH')), 1000);
+    getWeather(); setTimeout(loadData, 1000); sync();
+</script>
+</body>
+</html>
