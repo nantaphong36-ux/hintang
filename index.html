@@ -2,189 +2,120 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TANYA SMART FARM | Professional Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TANYA VISION | SMART ALERT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
     <style>
-        :root { 
-            --danger: #ff4d4d; --warning: #f39c12; --success: #00f2fe; --primary: #4facfe; --ai-purple: #a855f7;
-            --bg: #0b0f19; --card: rgba(30, 41, 59, 0.7); --text: #f8fafc; --border: rgba(255,255,255,0.1);
-        }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        /* Header & Status */
-        .header { text-align: center; padding: 20px 0; margin-top: 30px; }
-        .header h1 { margin: 0; font-size: 22px; color: var(--primary); letter-spacing: 2px; }
-        .sys-status { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--card); padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); font-size: 11px; }
-        .online-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; background: #666; }
-
-        /* Camera Section */
-        .vision-card { background: var(--card); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .cam-container { width: 100%; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-        .cam-container img { width: 100%; height: 100%; object-fit: cover; }
-        .cam-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; font-size: 10px; color: var(--success); border: 1px solid var(--border); z-index: 2; }
-        
-        /* Button Styles */
-        .cam-btn-group { padding: 12px; display: flex; gap: 8px; background: rgba(0,0,0,0.3); }
-        .btn-sw { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: var(--text); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; transition: 0.3s; }
-        .btn-sw:active { transform: scale(0.95); }
-        .btn-on { background: var(--primary) !important; color: white; }
-        .btn-flash-on { background: var(--warning) !important; color: black; }
-
-        /* Grid Layout */
-        .sensor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        @media (min-width: 768px) { .sensor-grid { grid-template-columns: repeat(4, 1fr); } }
-        
-        .s-card { background: var(--card); border-radius: 15px; padding: 15px; text-align: center; border: 1px solid var(--border); transition: 0.3s; }
-        .s-card i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--primary); }
-        .s-card .val { font-size: 22px; font-weight: bold; }
-        .s-card .unit { font-size: 11px; opacity: 0.6; }
-
-        /* Alert Area */
-        .alert-panel { background: rgba(168, 85, 247, 0.1); border-radius: 15px; padding: 15px; border: 1px solid var(--ai-purple); margin-bottom: 15px; }
-        
-        .chart-container { background: var(--card); border-radius: 20px; padding: 15px; border: 1px solid var(--border); margin-bottom: 15px; height: 300px; }
+        :root { --bg: #0b0f19; --card: #1e293b; --primary: #38bdf8; --neon: #fbbf24; --text: #f1f5f9; --alert: #f87171; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; }
+        .header { text-align: center; padding: 35px 0 10px; }
+        .header h1 { font-size: 20px; color: var(--primary); text-shadow: 0 0 10px var(--primary); margin: 0; }
+        .vision-frame { width: 100%; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; margin-bottom: 10px; }
+        .vision-frame img { width: 100%; display: block; min-height: 200px; }
+        .control-panel { background: var(--card); border-radius: 15px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
+        .switch { position: relative; width: 60px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+        input:checked + .slider:before { transform: translateX(30px); }
+        .info-card { background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 20px; padding: 15px; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .sensor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .s-box { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .s-label { color: #94a3b8; font-size: 10px; display: block; margin-bottom: 2px; }
+        .s-val { color: var(--primary); font-weight: bold; font-size: 16px; }
+        .warn { color: var(--alert) !important; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
 
-    <div class="sys-status">
-        <div><span class="online-dot" id="stat-dot"></span> <span id="stat-text">System Connecting...</span></div>
-        <div id="real-time">00:00:00</div>
-    </div>
-
     <div class="header">
-        <h1><i class="fas fa-leaf"></i> TANYA SMART FARM</h1>
-        <p style="font-size: 10px; opacity: 0.5; margin: 5px 0 0;">Professional Cloud Dashboard V17.1</p>
+        <h1>TANYA SMART VISION</h1>
+        <div style="font-size:11px; color:#94a3b8;"><i class="fas fa-map-marker-alt"></i> ท่าม่วง กาญจนบุรี</div>
     </div>
 
-    <div class="vision-card">
-        <div class="cam-container" id="cam-box">
-            <span class="cam-label" id="cam-status-tag"><i class="fas fa-video"></i> LIVE STREAM</span>
-            <img id="farm-cam" src="http://192.168.1.184/" alt="Camera View">
-            <div id="cam-block-msg" style="display:none; text-align:center; padding: 20px;">
-                <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--danger); margin-bottom: 10px;"></i>
-                <p style="font-size: 12px;">Browser บล็อกการเข้าถึงกล้อง (Insecure Content)</p>
-                <button onclick="window.open('http://192.168.1.184/', '_blank')" class="btn-sw" style="background: var(--success); color: #000; margin-top: 10px;">
-                    ปลดล็อกการเชื่อมต่อ
-                </button>
-            </div>
+    <div class="vision-frame">
+        <img id="stream" src="http://192.168.1.184/" alt="LIVE CAM" onerror="this.src='https://via.placeholder.com/640x360?text=Camera+Offline'">
+    </div>
+
+    <div class="control-panel">
+        <div style="font-weight:bold; font-size:14px;"><i class="fas fa-bolt" style="color:var(--neon)"></i> FLASH LED</div>
+        <label class="switch"><input type="checkbox" onchange="toggleFlash(this)"><span class="slider"></span></label>
+    </div>
+
+    <div class="info-card">
+        <div id="alert-box" style="display:none; background:rgba(248,113,113,0.2); padding:10px; border-radius:10px; margin-bottom:15px; border:1px solid var(--alert); font-size:13px; text-align:center; color:var(--alert);">
+            <i class="fas fa-exclamation-triangle"></i> <span id="alert-msg">ตรวจพบค่าผิดปกติ!</span>
         </div>
-        <div class="cam-btn-group">
-            <button class="btn-sw btn-on" id="cam-toggle" onclick="toggleCam()">
-                <i class="fas fa-camera"></i> <span id="cam-text">ปิดกล้อง</span>
-            </button>
-            <button class="btn-sw" onclick="refreshCam()">
-                <i class="fas fa-sync"></i> รีเฟรช
-            </button>
-            <button class="btn-sw" id="flash-toggle" onclick="toggleFlash()">
-                <i class="fas fa-lightbulb"></i> ไฟ Flash
-            </button>
+        <div class="sensor-grid">
+            <div class="s-box"><span class="s-label">อุณหภูมิ (F1)</span><span class="s-val" id="v1">--</span>°C</div>
+            <div class="s-box"><span class="s-label">ความชื้น (F2)</span><span class="s-val" id="v2">--</span>%</div>
+            <div class="s-box"><span class="s-label">ค่า VPD (F3)</span><span class="s-val" id="v3">--</span></div>
+            <div class="s-box"><span class="s-label">ความชื้นดิน (F4)</span><span class="s-val" id="v4">--</span>%</div>
+            <div class="s-box"><span class="s-label">eCO2 (F5)</span><span class="s-val" id="v5">--</span></div>
+            <div class="s-box"><span class="s-label">TVOC (F6)</span><span class="s-val" id="v6">--</span></div>
+            <div class="s-box"><span class="s-label">ฝนตก (F7)</span><span class="s-val" id="v7">--</span></div>
+            <div class="s-box"><span class="s-label">แสง (F8)</span><span class="s-val" id="v8">--</span></div>
         </div>
     </div>
-
-    <div class="alert-panel" id="ai-panel">
-        <div style="color: var(--ai-purple); font-weight: bold; margin-bottom: 5px; font-size: 12px;">
-            <i class="fas fa-brain"></i> AI ANALYTICS:
-        </div>
-        <div id="ai-msg" style="font-size: 11px;">กำลังวิเคราะห์ข้อมูลฟาร์ม...</div>
-    </div>
-
-    <div class="sensor-grid">
-        <div class="s-card"><i class="fas fa-thermometer-half"></i><span class="val" id="v1">--</span><br><span class="unit">Temp (°C)</span></div>
-        <div class="s-card"><i class="fas fa-tint"></i><span class="val" id="v2">--</span><br><span class="unit">Humid (%)</span></div>
-        <div class="s-card"><i class="fas fa-seedling"></i><span class="val" id="v4">--</span><br><span class="unit">Soil (%)</span></div>
-        <div class="s-card"><i class="fas fa-cloud-rain"></i><span class="val" id="v7">--</span><br><span class="unit">Rain (%)</span></div>
-    </div>
-
-    <div class="chart-container" id="chart-main"></div>
 
     <script>
-        const camURL = "http://192.168.1.184/";
-        let isCamOn = true;
-        let isFlashOn = false;
+        const camIP = "http://192.168.1.184/";
+        const tsURL = "https://api.thingspeak.com/channels/2687634/feeds.json?results=1&api_key=YEYGJ3V1CV8V6OEY";
+        let lastRainStatus = 0;
 
-        // --- Camera Logic ---
-        function toggleCam() {
-            isCamOn = !isCamOn;
-            const camImg = document.getElementById('farm-cam');
-            const btn = document.getElementById('cam-toggle');
-            if(isCamOn) {
-                camImg.src = camURL + "?t=" + new Date().getTime();
-                $(camImg).show();
-                btn.classList.add('btn-on');
-                document.getElementById('cam-text').innerText = "ปิดกล้อง";
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'th-TH';
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        function checkAlerts(f5, f6, f7) {
+            let alerts = [];
+            if (f5 > 1000) { alerts.push("ค่า คาร์บอนไดออกไซด์ สูงเกินมาตรฐานค่ะ"); $('#v5').addClass('warn'); } else { $('#v5').removeClass('warn'); }
+            if (f6 > 500) { alerts.push("ค่า สารระเหย ทีวีโอซี สูงเกินเกณฑ์ค่ะ"); $('#v6').addClass('warn'); } else { $('#v6').removeClass('warn'); }
+            if (f7 > 0 && lastRainStatus == 0) { alerts.push("ตรวจพบฝนตกในพื้นที่ค่ะ"); }
+            
+            lastRainStatus = f7;
+
+            if (alerts.length > 0) {
+                $('#alert-box').fadeIn();
+                $('#alert-msg').text(alerts[0]);
+                speak("คำเตือนค่ะ " + alerts.join(" และ "));
             } else {
-                camImg.src = "";
-                $(camImg).hide();
-                btn.classList.remove('btn-on');
-                document.getElementById('cam-text').innerText = "เปิดกล้อง";
+                $('#alert-box').fadeOut();
             }
         }
 
-        function refreshCam() {
-            if(!isCamOn) return;
-            document.getElementById('farm-cam').src = camURL + "?t=" + new Date().getTime();
-        }
-
-        function toggleFlash() {
-            isFlashOn = !isFlashOn;
-            const state = isFlashOn ? "on" : "off";
-            const btn = document.getElementById('flash-toggle');
-            fetch(`${camURL}led?status=${state}`).then(() => {
-                if(isFlashOn) btn.classList.add('btn-flash-on');
-                else btn.classList.remove('btn-flash-on');
-            }).catch(() => {
-                alert("ไม่สามารถติดต่อกล้องได้ โปรดเช็คการปลดล็อก HTTPS");
-            });
-        }
-
-        // ตรวจสอบว่าภาพกล้องถูกบล็อกหรือไม่
-        document.getElementById('farm-cam').onerror = function() {
-            if(isCamOn) {
-                document.getElementById('cam-block-msg').style.display = 'block';
-                this.style.display = 'none';
-            }
-        };
-
-        // --- Data & Charts ---
-        function updateClock() {
-            document.getElementById('real-time').innerText = new Date().toLocaleTimeString();
-        }
-
-        const chart = Highcharts.chart('chart-main', {
-            chart: { backgroundColor: 'transparent', style: { fontFamily: 'Segoe UI' } },
-            title: { text: 'Environmental Tracking', style: { color: '#4facfe', fontSize: '12px' } },
-            xAxis: { type: 'datetime', labels: { style: { color: '#666' } } },
-            yAxis: { title: null, gridLineColor: 'rgba(255,255,255,0.05)' },
-            series: [{ name: 'Temperature', data: [], color: '#ff4d4d' }, { name: 'Humidity', data: [], color: '#4facfe' }],
-            credits: { enabled: false }
-        });
-
-        function fetchData() {
-            // ดึงข้อมูลจาก ThingSpeak ของคุณ
-            $.getJSON(`https://api.thingspeak.com/channels/2687634/feeds.json?results=20`, function(data) {
-                const last = data.feeds[data.feeds.length - 1];
-                $('#v1').text(parseFloat(last.field1).toFixed(1));
-                $('#v2').text(parseFloat(last.field2).toFixed(1));
-                $('#v4').text(parseFloat(last.field4).toFixed(0));
-                $('#v7').text(parseFloat(last.field7).toFixed(0));
+        function updateData() {
+            $.get(tsURL, function(data) {
+                const f = data.feeds[0];
+                $('#v1').text(parseFloat(f.field1).toFixed(1));
+                $('#v2').text(parseFloat(f.field2).toFixed(1));
+                $('#v3').text(parseFloat(f.field3).toFixed(2));
+                $('#v4').text(parseFloat(f.field4).toFixed(1));
+                $('#v5').text(parseInt(f.field5));
+                $('#v6').text(parseInt(f.field6));
+                $('#v7').text(parseFloat(f.field7) > 0 ? "ตรวจพบฝน" : "ปกติ");
+                $('#v8').text(parseFloat(f.field8).toFixed(0));
                 
-                // Update Status
-                document.getElementById('stat-dot').style.background = '#00f2fe';
-                document.getElementById('stat-text').innerText = 'System Online';
-
-                // AI Analysis Simple Logic
-                if(parseFloat(last.field7) > 50) $('#ai-msg').html("<span style='color:var(--danger)'>⛈️ ตรวจพบฝน! แนะนำให้ปิดหลังคาฟาร์ม</span>");
-                else $('#ai-msg').text("✅ สภาวะอากาศปกติ ระบบทำงานตามแผนงาน");
+                checkAlerts(parseInt(f.field5), parseInt(f.field6), parseFloat(f.field7));
             });
         }
 
-        setInterval(updateClock, 1000);
-        setInterval(fetchData, 15000);
-        fetchData();
+        function toggleFlash(el) {
+            fetch(`${camIP}led?status=${el.checked ? "on" : "off"}`, { mode: 'no-cors' });
+            speak(el.checked ? "เปิดไฟแฟลชค่ะ" : "ปิดไฟแฟลชค่ะ");
+        }
+
+        setInterval(updateData, 25000);
+        updateData();
+        document.body.onclick = function() { speak("ระบบเสียงพร้อมทำงานแล้วค่ะ"); updateData(); };
     </script>
 </body>
 </html>
