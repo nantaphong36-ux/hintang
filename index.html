@@ -3,208 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TANYA SMART FARM | V88.0 FINAL VOICE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>AI Farm Monitor - ThingSpeak</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0b101a; --card: #1e293b; --primary: #38bdf8; --text: #f1f5f9; --ok: #4ade80; --warn: #fbbf24; --danger: #f87171; }
-        .light-mode { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --primary: #0284c7; }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; padding-bottom: 110px; transition: 0.3s; }
-        
-        /* Header */
-        .header-container { text-align: center; margin-bottom: 10px; }
-        .brand-header { font-size: 22px; font-weight: bold; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin: 0; }
-        .location-text { color: var(--warn); font-size: 11px; font-weight: bold; }
-        .time-text { color: #94a3b8; font-size: 10px; }
-
-        /* Top Weather */
-        .top-weather-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: rgba(30, 41, 59, 0.4); padding: 8px; border-radius: 12px; margin-bottom: 12px; font-size: 9px; border: 1px solid rgba(255,255,255,0.03); }
-        .w-mini-item { text-align: center; }
-        .w-mini-item b { color: var(--primary); display: block; font-size: 11px; }
-
-        /* Sensors Grid */
-        .sensor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-        .s-card { background: var(--card); padding: 12px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .s-label { font-size: 10px; color: #94a3b8; font-weight: bold; margin-bottom: 4px; }
-        .s-val { font-size: 22px; font-weight: bold; transition: 0.3s; }
-
-        /* AI Action Box - BIG TEXT */
-        .ai-box { background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 18px; border-left: 5px solid var(--primary); margin-bottom: 15px; }
-        .alert-item { margin-bottom: 12px; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .alert-title { color: var(--danger); font-weight: bold; font-size: 14px; }
-        .alert-action { 
-            color: var(--ok); font-size: 17px; font-weight: 800; display: block; 
-            margin-top: 6px; background: rgba(74, 222, 128, 0.15); padding: 10px; border-radius: 10px; border-left: 6px solid var(--ok);
-        }
-
-        /* Activity Report */
-        .report-box { background: var(--card); padding: 12px; border-radius: 15px; border: 1px solid var(--primary); margin-bottom: 12px; }
-        .act-row { background: rgba(0,0,0,0.15); padding: 8px; border-radius: 10px; margin-bottom: 6px; font-size: 10px; }
-        .active-act { border: 1px solid var(--ok); background: rgba(74, 222, 128, 0.05); }
-        .progress-bg { height: 4px; background: #334155; border-radius: 2px; margin-top: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--ok); width: 0%; transition: 0.5s; }
-
-        /* Controls */
-        .fab-container { position: fixed; bottom: 50px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .fab { width: 45px; height: 45px; border-radius: 50%; border: none; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
-
-        .brand-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg); padding: 8px 0; text-align: center; font-size: 9px; color: #64748b; }
-        .val-ok { color: var(--ok); } .val-danger { color: var(--danger); } .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.4; } }
+        :root { --primary: #2e7d32; --bg: #f1f8e9; --accent: #ffd600; }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg); text-align: center; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .ai-status { background: #e3f2fd; padding: 20px; border-radius: 20px; margin-bottom: 20px; border-left: 10px solid #2196f3; min-height: 80px; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 1.1em; color: #0d47a1; }
+        .sensor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .card { background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .label { font-size: 0.8em; color: #777; margin-bottom: 5px; }
+        .value { font-size: 1.6em; font-weight: 600; color: #2c3e50; }
+        .unit { font-size: 0.6em; color: #999; margin-left: 5px; }
+        .voice-btn { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 1.1em; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(46,125,50,0.3); }
+        .voice-btn.active { background: #9e9e9e; box-shadow: none; }
+        .footer { margin-top: 20px; font-size: 0.7em; color: #aaa; }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="brand-header">TANYA SMART FARM</div>
-        <div class="location-text">อ.ท่าม่วง จ.กาญจนบุรี</div>
-        <div id="w-now-time" class="time-text">--:--</div>
-    </div>
+<div class="container">
+    <h1>🌱 AI Smart Farm Monitor</h1>
+    <button id="startBtn" class="voice-btn" onclick="initAI()">🎯 เปิดระบบเสียงแจ้งเตือน AI</button>
 
-    <div class="top-weather-bar">
-        <div class="w-mini-item">ชื้นนอก <b id="out-hum">--%</b></div>
-        <div class="w-mini-item">ลม <b id="out-wind">-- m/s</b></div>
-        <div class="w-mini-item">AQI <b id="out-aqi">--</b></div>
-        <div class="w-mini-item">โอกาสฝน <b id="out-pop">--%</b></div>
-        <div class="w-mini-item">ขึ้น <b id="sunrise">--:--</b></div>
-        <div class="w-mini-item">ตก <b id="sunset">--:--</b></div>
+    <div class="ai-status">
+        <div id="ai-text">กรุณากดปุ่มด้านบนเพื่อเริ่มการทำงาน...</div>
     </div>
 
     <div class="sensor-grid">
-        <div class="s-card"><span class="s-label">Temp (F1)</span><div class="s-val" id="f1">--</div></div>
-        <div class="s-card"><span class="s-label">Hum (F2)</span><div class="s-val" id="f2">--</div></div>
-        <div class="s-card"><span class="s-label">VPD (F3)</span><div class="s-val" id="f3">--</div></div>
-        <div class="s-card"><span class="s-label">Soil (F4)</span><div class="s-val" id="f4">--</div></div>
-        <div class="s-card"><span class="s-label">eCO2 (F5)</span><div class="s-val" id="f5">--</div></div>
-        <div class="s-card"><span class="s-label">TVOC (F6)</span><div class="s-val" id="f6">--</div></div>
-        <div class="s-card"><span class="s-label">Rain (F7)</span><div class="s-val" id="f7">--</div></div>
-        <div class="s-card"><span class="s-label">Light (F8)</span><div class="s-val" id="f8">--</div></div>
+        <div class="card"><div class="label">อุณหภูมิอากาศ</div><div class="value"><span id="f1">--</span><span class="unit">°C</span></div></div>
+        <div class="card"><div class="label">ความชื้นอากาศ</div><div class="value"><span id="f2">--</span><span class="unit">%RH</span></div></div>
+        <div class="card"><div class="label">ค่า VPD</div><div id="vpd-box" class="value"><span id="f3">--</span><span class="unit">kPa</span></div></div>
+        <div class="card"><div class="label">ความชื้นดิน</div><div class="value"><span id="f4">--</span><span class="unit">%</span></div></div>
+        <div class="card"><div class="label">eCO2</div><div class="value"><span id="f5">--</span><span class="unit">ppm</span></div></div>
+        <div class="card"><div class="label">TVOC</div><div class="value"><span id="f6">--</span><span class="unit">ppb</span></div></div>
+        <div class="card"><div class="label">สถานะฝน</div><div class="value"><span id="f7">--</span><span class="unit">%</span></div></div>
+        <div class="card"><div class="label">ความเข้มแสง</div><div class="value"><span id="f8">--</span><span class="unit">%</span></div></div>
     </div>
 
-    <div class="ai-box">
-        <b style="color:var(--primary); font-size:12px;"><i class="fas fa-robot"></i> AI Auditor Action Guide:</b>
-        <div id="ai-text" style="margin-top:10px;"></div>
-    </div>
+    <div class="footer" id="last-update">อัปเดตล่าสุด: --</div>
+</div>
 
-    <div class="report-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <b style="color:var(--primary); font-size:11px;"><i class="fas fa-seedling"></i> กิจกรรมพืช</b>
-            <span style="font-size:9px; background:var(--warn); color:#000; padding:1px 6px; border-radius:8px; font-weight:bold;">G-Zone: <span id="gz-time">0</span> min</span>
-        </div>
-        <div class="act-row" id="act-m"><span>☀️ เริ่มเช้า 06:00-09:00</span><div class="progress-bg"><div class="progress-fill" id="pb-m"></div></div></div>
-        <div class="act-row" id="act-d"><span>🌿 สังเคราะห์แสง 09:00-17:00</span><div class="progress-bg"><div class="progress-fill" id="pb-d" style="background:var(--warn)"></div></div></div>
-        <div class="act-row" id="act-n"><span>🌙 พักผ่อน 17:00-05:59</span><div class="progress-bg"><div class="progress-fill" id="pb-n" style="background:#818cf8"></div></div></div>
-    </div>
+<script>
+    const CHANNEL_ID = "2687634";
+    const READ_KEY = "YEYGJ3V1CV8V6OEY";
+    
+    let isAILive = false;
+    let lastState = { rain: false, soilLow: false, vpdHigh: false, lightHigh: false };
 
-    <div class="fab-container">
-        <button class="fab" onclick="exportCSV()" style="background: #10b981;"><i class="fas fa-file-csv"></i></button>
-        <button class="fab" id="voice-btn" onclick="toggleVoice()" style="background: #fbbf24;"><i class="fas fa-volume-mute"></i></button>
-        <button class="fab" onclick="toggleTheme()" style="background: #6366f1;"><i class="fas fa-adjust"></i></button>
-    </div>
+    function initAI() {
+        isAILive = true;
+        document.getElementById('startBtn').innerText = "🟢 AI กำลังเฝ้าระวังฟาร์มของคุณ";
+        document.getElementById('startBtn').classList.add('active');
+        speak("ระบบแจ้งเตือนเสียงภาษาไทยเปิดใช้งานแล้วค่ะ กำลังเชื่อมต่อข้อมูลจากติงสปีค");
+        fetchData();
+        setInterval(fetchData, 16000); // ThingSpeak อัปเดตทุก 15-16 วินาที
+    }
 
-    <div class="brand-footer">power by tanya @ Gemini AI | 2025</div>
+    async function fetchData() {
+        try {
+            const res = await fetch(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_KEY}`);
+            const data = await res.json();
+            
+            if (data) {
+                // อัปเดตตัวเลขบนหน้าจอ
+                const f = [data.field1, data.field2, data.field3, data.field4, data.field5, data.field6, data.field7, data.field8];
+                for(let i=0; i<8; i++) {
+                    const val = parseFloat(f[i]);
+                    document.getElementById(`f${i+1}`).innerText = !isNaN(val) ? (i === 2 ? val.toFixed(2) : val.toFixed(1)) : "--";
+                }
+                document.getElementById('last-update').innerText = "อัปเดตล่าสุด: " + new Date(data.created_at).toLocaleString('th-TH');
 
-    <script>
-        const weatherKey = "02868cd5e15cf0f70bfe001a9822c367";
-        const tsURL = "https://api.thingspeak.com/channels/2687634/feeds.json?results=20&api_key=YEYGJ3V1CV8V6OEY";
-        let gzSeconds = 0, isVoiceOn = false, lastAlertMsg = "";
-        let synth = window.speechSynthesis;
-        let thaiVoice = null;
-
-        function loadVoices() {
-            const voices = synth.getVoices();
-            thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang === 'th_TH');
-        }
-        if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
-
-        function speak(text) {
-            if (!isVoiceOn) return;
-            synth.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'th-TH';
-            if (thaiVoice) msg.voice = thaiVoice;
-            msg.rate = 1.0;
-            synth.speak(msg);
-        }
-
-        function toggleVoice() { 
-            isVoiceOn = !isVoiceOn; 
-            const btn = $('#voice-btn');
-            if(isVoiceOn) {
-                btn.html('<i class="fas fa-volume-up"></i>').css('background', '#4ade80');
-                loadVoices();
-                speak("ระบบเสียงทำงานแล้วค่ะ");
-            } else {
-                btn.html('<i class="fas fa-volume-mute"></i>').css('background', '#fbbf24');
-                synth.cancel();
+                processAI(f);
             }
-        }
+        } catch (e) { console.error("Error:", e); }
+    }
 
-        function toggleTheme() { $('body').toggleClass('light-mode'); }
+    function processAI(fields) {
+        const vpd = parseFloat(fields[2]);
+        const soil = parseFloat(fields[3]);
+        const rainRaw = parseFloat(fields[6]); // อ้างอิงจาก Arduino ที่ส่งค่า adc3 (30000=แห้ง)
+        const light = parseFloat(fields[7]);
 
-        function updateActivity() {
-            const now = new Date(), hr = now.getHours(), min = now.getMinutes(), totalMin = hr * 60 + min;
-            $('.act-row').removeClass('active-act');
-            if (totalMin >= 360 && totalMin < 540) { $('#act-m').addClass('active-act'); $('#pb-m').css('width', ((totalMin-360)/180*100)+'%'); }
-            else if (totalMin >= 540 && totalMin < 1020) { $('#act-d').addClass('active-act'); $('#pb-d').css('width', ((totalMin-540)/480*100)+'%'); }
-            else { $('#act-n').addClass('active-act'); let nProg = totalMin >= 1020 ? (totalMin-1020)/780 : (totalMin+420)/780; $('#pb-n').css('width', (nProg*100)+'%'); }
-            $('#w-now-time').text(now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'}) + ' น.');
-        }
+        let report = "สภาพแวดล้อมโดยรวมปกติค่ะ";
+        
+        // 1. ตรวจสอบฝน (ถ้าค่าต่ำกว่า 5000 คือฝนตก)
+        if (rainRaw < 5000) {
+            if (!lastState.rain) { speak("แจ้งเตือนค่ะ ขณะนี้ฝนตก ระบบปิดการรดน้ำแล้วค่ะ"); lastState.rain = true; }
+            report = "⚠️ ฝนตก: ระบบหยุดทำงานเพื่อความปลอดภัย";
+        } else { lastState.rain = false; }
 
-        function updateWeather() {
-            const lat = 13.9125, lon = 99.6458;
-            $.getJSON(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherKey}&lang=th`, d => {
-                $('#sunrise').text(new Date(d.sys.sunrise * 1000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-                $('#sunset').text(new Date(d.sys.sunset * 1000).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
-                $('#out-hum').text(d.main.humidity + '%');
-                $('#out-wind').text(d.wind.speed.toFixed(1) + ' m/s');
-                if(d.weather[0]) $('#out-aqi').text(d.weather[0].description);
-            });
-        }
+        // 2. ตรวจสอบดิน
+        if (soil < 30) {
+            if (!lastState.soilLow) { speak("แจ้งเตือนค่ะ ความชื้นดินต่ำเกินไป กำลังเปิดน้ำรดดินค่ะ"); lastState.soilLow = true; }
+            report = "💧 ดินแห้ง: ระบบกำลังเติมความชื้น";
+        } else { lastState.soilLow = false; }
 
-        function analyze() {
-            $.getJSON(tsURL, data => {
-                const f = data.feeds[data.feeds.length-1];
-                const v = [f.field1, f.field2, f.field3, f.field4, f.field5, f.field6, f.field7, f.field8].map(x => parseFloat(x)||0);
-                
-                for(let i=1; i<=8; i++) {
-                    const el = $(`#f${i}`); let val = v[i-1];
-                    el.text(i==7 ? (val>0?"ฝนตก":"ปกติ") : (i==3?val.toFixed(2):val.toFixed(1)));
-                    if(i==8) el.text(val.toFixed(0)+"%");
-                    el.removeClass('val-ok val-danger blink');
-                    if((i==1 && val>33)||(i==2 && val>90)||(i==3 && val>1.6)||(i==7 && val>0)) el.addClass('val-danger blink');
-                    else el.addClass('val-ok');
-                }
+        // 3. ตรวจสอบ VPD (แดดร้อน/อากาศแห้ง)
+        if (vpd > 1.6) {
+            if (!lastState.vpdHigh) { speak("แจ้งเตือนค่ะ อากาศร้อนและแห้งเกินไป กำลังพ่นหมอกระบายความร้อนค่ะ"); lastState.vpdHigh = true; }
+            report = "🔥 อากาศวิกฤต: พ่นหมอกลดค่า วี พี ดี";
+            document.getElementById('vpd-box').style.color = "red";
+        } else { lastState.vpdHigh = false; document.getElementById('vpd-box').style.color = "#2c3e50"; }
 
-                let alerts = [];
-                if(v[6]>0) alerts.push({t:"ฝนตก", a:"ปิดระบายอากาศด่วน"});
-                if(v[2]>1.6) alerts.push({t:"VPD สูง", a:"เปิดพ่นหมอกเพิ่มความชื้น"});
-                if(v[0]>33) alerts.push({t:"ร้อนจัด", a:"เปิดพัดลมระบายอากาศ"});
+        // 4. ตรวจสอบแสง
+        if (light > 85) {
+            if (!lastState.lightHigh) { speak("แจ้งเตือนค่ะ แสงแดดแรงจัดเกินไป กำลังสั่งปิดหลังคาค่ะ"); lastState.lightHigh = true; }
+            report = "☀️ แดดแรงจัด: ปิดหลังคาป้องกันพืชไหม้";
+        } else { lastState.lightHigh = false; }
 
-                if(alerts.length > 0) {
-                    $('#ai-text').html(alerts.map(al => `<div class="alert-item"><span class="alert-title">🚨 ${al.t}</span><span class="alert-action">→ วิธีแก้: ${al.a}</span></div>`).join(""));
-                    if(lastAlertMsg !== alerts[0].a) { speak("คำเตือน " + alerts[0].a); lastAlertMsg = alerts[0].a; }
-                } else {
-                    $('#ai-text').html("<span class='val-ok'>✅ สภาวะปกติ: พืชแข็งแรงดี</span>");
-                    lastAlertMsg = "";
-                }
-                if(v[2]>=0.8 && v[2]<=1.2) { gzSeconds += 30; $('#gz-time').text(Math.floor(gzSeconds/60)); }
-            });
-        }
+        document.getElementById('ai-text').innerText = report;
+    }
 
-        function exportCSV() {
-            $.getJSON(tsURL, d => {
-                let csv = "Time,Temp,Hum,VPD,Soil,CO2,TVOC,Rain,Light\n";
-                d.feeds.forEach(f => { csv += `${f.created_at},${f.field1},${f.field2},${f.field3},${f.field4},${f.field5},${f.field6},${f.field7},${f.field8}\n`; });
-                const blob = new Blob([csv], {type:'text/csv'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = `Farm_Data.csv`; a.click();
-            });
-        }
+    function speak(text) {
+        if (!isAILive) return;
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'th-TH';
+        msg.rate = 1.0;
+        window.speechSynthesis.speak(msg);
+    }
+</script>
 
-        updateWeather(); updateActivity(); analyze();
-        setInterval(analyze, 30000); setInterval(updateActivity, 60000); setInterval(updateWeather, 600000);
-    </script>
 </body>
 </html>
