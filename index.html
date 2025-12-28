@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Farm AI PRO - Google Sites Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farm AI PRO - Remote Control</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -11,9 +12,9 @@
         body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
         .active-card { background-color: #f0fdf4 !important; border-color: #22c55e !important; }
         .chart-box { background: white; padding: 20px; border-radius: 2rem; border: 1px solid #e2e8f0; margin-bottom: 20px; min-height: 350px; }
-        .status-green { color: #10b981; } .status-orange { color: #f59e0b; } .status-red { color: #ef4444; }
-        .status-blue { color: #3b82f6; font-weight: 800; }
         button:active { transform: scale(0.95); }
+        .status-on { color: #22c55e; }
+        .status-off { color: #cbd5e1; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -22,30 +23,29 @@
         <div class="bg-white/90 backdrop-blur-md flex flex-col md:flex-row justify-between items-center mb-6 gap-4 p-6 rounded-3xl shadow-sm border border-white">
             <div>
                 <h1 class="text-3xl font-black text-slate-800 italic">Smart Farm <span class="text-green-500">AI PRO</span></h1>
-                <div id="connection-status" class="text-slate-400 text-[10px] font-bold tracking-widest uppercase mt-1 text-center md:text-left">Ready & Secured</div>
+                <div id="connection-status" class="text-slate-400 text-[10px] font-bold tracking-widest uppercase mt-1">Status: Online</div>
             </div>
-            <div id="summary-text" class="text-xs font-bold text-slate-500 italic uppercase tracking-tighter">Updating Data...</div>
             <div class="flex gap-2 p-1 bg-slate-200/50 rounded-2xl">
                 <button onclick="setMode(0)" id="mode-auto" class="px-6 py-2 rounded-xl font-bold text-xs transition-all">AUTO</button>
                 <button onclick="setMode(1)" id="mode-manual" class="px-6 py-2 rounded-xl font-bold text-xs transition-all">MANUAL</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <button onclick="toggleDevice('V28', 'pump1')" id="btn-pump1" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all text-center">
-                <i id="icon-pump1" class="fas fa-faucet text-2xl text-slate-300 mb-2"></i>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center">
+            <button onclick="toggleDevice('V28', 'pump1')" id="btn-pump1" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all">
+                <i id="icon-pump1" class="fas fa-faucet text-2xl mb-2 status-off"></i>
                 <p class="text-[10px] font-black uppercase text-slate-500">Water Pump</p>
             </button>
-            <button onclick="toggleDevice('V29', 'pump2')" id="btn-pump2" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all text-center">
-                <i id="icon-pump2" class="fas fa-spray-can text-2xl text-slate-300 mb-2"></i>
+            <button onclick="toggleDevice('V29', 'pump2')" id="btn-pump2" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all">
+                <i id="icon-pump2" class="fas fa-spray-can text-2xl mb-2 status-off"></i>
                 <p class="text-[10px] font-black uppercase text-slate-500">Mist Spray</p>
             </button>
-            <button onclick="toggleDevice('V14', 'roof')" id="btn-roof" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all text-center">
-                <i id="icon-roof" class="fas fa-warehouse text-2xl text-slate-300 mb-2"></i>
+            <button onclick="toggleDevice('V14', 'roof')" id="btn-roof" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all">
+                <i id="icon-roof" class="fas fa-warehouse text-2xl mb-2 status-off"></i>
                 <p class="text-[10px] font-black uppercase text-slate-500">Roof</p>
             </button>
-            <button onclick="toggleDevice('V12', 'light')" id="btn-light" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all text-center">
-                <i id="icon-light" class="fas fa-lightbulb text-2xl text-slate-300 mb-2"></i>
+            <button onclick="toggleDevice('V12', 'light')" id="btn-light" class="bg-white p-5 rounded-3xl border-2 border-transparent shadow-sm transition-all">
+                <i id="icon-light" class="fas fa-lightbulb text-2xl mb-2 status-off"></i>
                 <p class="text-[10px] font-black uppercase text-slate-500">Light</p>
             </button>
         </div>
@@ -55,13 +55,13 @@
         <div class="chart-box"><div id="chart-upper" style="height: 300px;"></div></div>
         <div class="chart-box"><div id="chart-lower" style="height: 300px;"></div></div>
 
-        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative border border-slate-700">
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl border border-slate-700">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black uppercase tracking-tighter italic"><i class="fas fa-robot text-green-400 mr-2"></i> AI Advisor & Arduino Logic</h2>
-                <button onclick="generateAIReport()" id="ai-btn" class="bg-white text-slate-900 font-bold py-2 px-6 rounded-xl text-xs uppercase hover:bg-green-400 transition-all">Refresh AI</button>
+                <h2 class="text-xl font-black uppercase italic"><i class="fas fa-robot text-green-400 mr-2"></i> AI Advisor</h2>
+                <button onclick="generateAIReport()" id="ai-btn" class="bg-white text-slate-900 font-bold py-2 px-6 rounded-xl text-xs uppercase hover:bg-green-400">Refresh AI</button>
             </div>
-            <div id="ai-report" class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-sm leading-relaxed min-h-[100px]">
-                กำลังวิเคราะห์ข้อมูล...
+            <div id="ai-report" class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-sm leading-relaxed">
+                กำลังวิเคราะห์ข้อมูลล่าสุด...
             </div>
         </div>
     </div>
@@ -69,7 +69,7 @@
     <script>
         const CFG = {
             BLYNK_TOKEN: "YAZf3_nX5i3sx32pFKNk6t3GBHfy4U_l",
-            BLYNK_URL: "https://blynk2.iot-cm.com:9443/", // ใช้ HTTPS สำหรับ Google Sites
+            BLYNK_URL: "https://blynk2.iot-cm.com:9443/", // ต้องเป็น HTTPS พอร์ต 9443 เท่านั้น
             TS_CH: "2687634",
             TS_KEY: "YEYGJ3V1CV8V6OEY",
             GEMINI_KEY: "AIzaSyBTjjMzlRwftbrAWB6cKINCMLgee9mzmvQ"
@@ -78,18 +78,17 @@
         let deviceStates = { pump1: 0, pump2: 0, roof: 0, light: 0, isManual: 0 };
         let historyData = [];
 
-        // ฟังก์ชันสั่งงาน Blynk แบบข้ามการบล็อก
+        // ฟังก์ชันสั่งงาน Blynk แบบ Image Beacon (ข้ามการบล็อกจาก GitHub/Browser)
         function updateBlynk(pin, val) {
             return new Promise((resolve) => {
+                const img = new Image();
                 const url = `${CFG.BLYNK_URL}${CFG.BLYNK_TOKEN}/update/${pin}?value=${val}&ts=${Date.now()}`;
                 
-                // เทคนิค Image Beacon (ส่งผ่านรูปภาพเพื่อเลี่ยง CORS)
-                const img = new Image();
                 img.onload = () => resolve();
-                img.onerror = () => resolve(); // ยังไงก็ Resolve เพื่อให้ UI ทำงานต่อได้
+                img.onerror = () => resolve(); // ยังไงก็ถือว่าส่งคำสั่งสำเร็จ
                 img.src = url;
 
-                // พยายามส่ง fetch ควบคู่ (บาง Browser อาจอนุญาต)
+                // สำรองด้วย fetch (no-cors) สำหรับบาง Browser
                 fetch(url, { mode: 'no-cors' }).catch(() => {});
             });
         }
@@ -97,10 +96,9 @@
         async function syncStates() {
             try {
                 const pins = ['V28', 'V29', 'V14', 'V12', 'V34'];
-                // ดึงข้อมูลผ่าน HTTPS ทีละ Pin (เพื่อความเสถียรบน Google Sites)
                 for (let p of pins) {
-                    const r = await fetch(`${CFG.BLYNK_URL}${CFG.BLYNK_TOKEN}/get/${p}`);
-                    const data = await r.json();
+                    const res = await fetch(`${CFG.BLYNK_URL}${CFG.BLYNK_TOKEN}/get/${p}`);
+                    const data = await res.json();
                     if (p === 'V28') deviceStates.pump1 = data[0];
                     if (p === 'V29') deviceStates.pump2 = data[0];
                     if (p === 'V14') deviceStates.roof = data[0];
@@ -108,22 +106,32 @@
                     if (p === 'V34') deviceStates.isManual = data[0];
                 }
                 renderUI();
-            } catch (e) { console.log("Background sync..."); }
+            } catch (e) { console.warn("Background sync active..."); }
         }
 
         function renderUI() {
             document.getElementById('mode-auto').className = `px-6 py-2 rounded-xl font-bold text-xs ${deviceStates.isManual == 0 ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-400'}`;
             document.getElementById('mode-manual').className = `px-6 py-2 rounded-xl font-bold text-xs ${deviceStates.isManual == 1 ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-400'}`;
             
-            const map = {pump1:['btn-pump1','icon-pump1','text-blue-500'], pump2:['btn-pump2','icon-pump2','text-blue-400'], roof:['btn-roof','icon-roof','text-orange-500'], light:['btn-light','icon-light','text-yellow-400']};
-            Object.keys(map).forEach(k => {
-                const [b, i, c] = map[k];
-                if (deviceStates[k] == 1) { 
-                    document.getElementById(b).classList.add('active-card'); 
-                    document.getElementById(i).className = `fas ${document.getElementById(i).classList[1]} text-2xl ${c}`;
-                } else { 
-                    document.getElementById(b).classList.remove('active-card'); 
-                    document.getElementById(i).className = `fas ${document.getElementById(i).classList[1]} text-2xl text-slate-300`;
+            const mapping = {
+                pump1: ['btn-pump1', 'icon-pump1', 'text-blue-500'],
+                pump2: ['btn-pump2', 'icon-pump2', 'text-cyan-400'],
+                roof: ['btn-roof', 'icon-roof', 'text-orange-500'],
+                light: ['btn-light', 'icon-light', 'text-yellow-400']
+            };
+
+            Object.keys(mapping).forEach(key => {
+                const [btnId, iconId, colorClass] = mapping[key];
+                const btn = document.getElementById(btnId);
+                const icon = document.getElementById(iconId);
+                if (deviceStates[key] == 1) {
+                    btn.classList.add('active-card');
+                    icon.classList.remove('status-off');
+                    icon.classList.add(colorClass);
+                } else {
+                    btn.classList.remove('active-card');
+                    icon.classList.add('status-off');
+                    icon.className = `fas ${icon.classList[1]} text-2xl mb-2 status-off`;
                 }
             });
         }
@@ -135,27 +143,17 @@
                 historyData = data.feeds;
                 const latest = historyData[historyData.length - 1];
 
-                arduinoLogicMonitor(latest);
                 updateSensorCards(latest);
                 drawCharts();
                 syncStates();
             } catch (e) { }
         }
 
-        function arduinoLogicMonitor(latest) {
-            const VPD = parseFloat(latest.field3), M = parseFloat(latest.field4), R = parseFloat(latest.field7);
-            let insights = [];
-            if (R > 80) insights.push("🌧️ ฝนตกหนัก: ระบบสั่งหยุดน้ำอัตโนมัติ");
-            if (M < 40) insights.push("🏜️ ดินแห้ง: กำลังเริ่มการรดน้ำ");
-            if (VPD > 1.5) insights.push("🔥 VPD สูง: กำลังพ่นหมอกระบายความร้อน");
-            document.getElementById('ai-report').innerHTML = insights.length > 0 ? insights.map(i => `<div class='mb-2'>${i}</div>`).join('') : "สภาพอากาศในฟาร์มปกติ";
-        }
-
         function updateSensorCards(latest) {
             const labels = ["Temp", "Humid", "VPD", "Soil", "CO2", "TVOC", "Rain", "Light"];
             document.getElementById('sensor-grid').innerHTML = labels.map((l, i) => {
                 let val = parseFloat(latest['field'+(i+1)] || 0).toFixed(2);
-                return `<div class="bg-white p-5 rounded-3xl border border-white shadow-sm text-center">
+                return `<div class="bg-white p-5 rounded-3xl border shadow-sm">
                     <p class="text-[9px] font-bold text-slate-400 uppercase">${l}</p>
                     <h3 class="text-xl font-black text-slate-700">${val}</h3>
                 </div>`;
@@ -163,29 +161,27 @@
         }
 
         function drawCharts() {
-            const opt = { chart: { type: 'areaspline', backgroundColor: 'transparent' }, title: { text: null }, xAxis: { labels: {enabled: false} }, yAxis: { title: {text: null} }, credits: { enabled: false }, plotOptions: { areaspline: { fillOpacity: 0.1, marker: {enabled: false} } } };
+            const opt = { chart: { backgroundColor: 'transparent' }, title: { text: null }, xAxis: { labels: {enabled: false} }, credits: { enabled: false } };
             Highcharts.chart('chart-upper', { ...opt, series: [
-                { name: 'Temp', data: historyData.map(f => parseFloat(f.field1)), color: '#ef4444' },
-                { name: 'Soil', data: historyData.map(f => parseFloat(f.field4)), color: '#10b981' }
+                { name: 'Soil', data: historyData.map(f => parseFloat(f.field4)), color: '#10b981', type: 'areaspline' }
             ]});
             Highcharts.chart('chart-lower', { ...opt, series: [
-                { name: 'VPD', data: historyData.map(f => parseFloat(f.field3)), color: '#f59e0b' },
-                { name: 'Rain', data: historyData.map(f => parseFloat(f.field7)), color: '#06b6d4' }
+                { name: 'VPD', data: historyData.map(f => parseFloat(f.field3)), color: '#f59e0b', type: 'areaspline' }
             ]});
         }
 
-        async function toggleDevice(pin, key) { 
-            if (deviceStates.isManual == 0) return alert("โปรดเลือก MANUAL MODE"); 
-            const next = deviceStates[key] == 1 ? 0 : 1; 
-            await updateBlynk(pin, next); 
-            deviceStates[key] = next; 
-            renderUI(); 
+        async function toggleDevice(pin, key) {
+            if (deviceStates.isManual == 0) return alert("โปรดเลือก MANUAL MODE ก่อนสั่งงาน");
+            const nextVal = deviceStates[key] == 1 ? 0 : 1;
+            await updateBlynk(pin, nextVal);
+            deviceStates[key] = nextVal;
+            renderUI();
         }
 
-        async function setMode(val) { 
-            await updateBlynk('V34', val); 
-            deviceStates.isManual = val; 
-            renderUI(); 
+        async function setMode(val) {
+            await updateBlynk('V34', val);
+            deviceStates.isManual = val;
+            renderUI();
         }
 
         setInterval(fetchSensors, 15000);
