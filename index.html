@@ -56,7 +56,7 @@
         isAILive = true;
         document.getElementById('startBtn').innerText = "🟢 AI กำลังเฝ้าระวังฟาร์มของคุณ";
         document.getElementById('startBtn').classList.add('active');
-        speak("ระบบแจ้งเตือนเสียงภาษาไทยเปิดใช้งานแล้วค่ะ กำลังเชื่อมต่อข้อมูลจากติงสปีค");
+        speak("ระบบแจ้งเตือนเสียงภาษาไทยเปิดใช้งานแล้วค่ะ กำลังเชื่อมต่อข้อมูลจาก sensor ค่ะ");
         fetchData();
         setInterval(fetchData, 16000); // ThingSpeak อัปเดตทุก 15-16 วินาที
     }
@@ -127,4 +127,5 @@
 </script>
 
 </body>
+
 </html>
