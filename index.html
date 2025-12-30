@@ -22,11 +22,9 @@
         body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* Header ย้ายมาตรงกลาง */
         header { text-align: center; margin-bottom: 30px; position: relative; }
         .theme-btn { position: absolute; right: 0; top: 0; width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; color: var(--text-main); }
 
-        /* Weather Panel */
         .weather-panel { 
             background: var(--bg-card); padding: 20px; border-radius: 20px; 
             border: 1px solid var(--border-color); margin-bottom: 25px;
@@ -35,11 +33,9 @@
         .weather-top { display: flex; justify-content: center; align-items: center; gap: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
         .weather-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; font-size: 0.9rem; text-align: center; }
 
-        /* Grids */
         .grid-sensors { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .grid-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
 
-        /* Cards */
         .card { background: var(--bg-card); border-radius: 18px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: 0.3s; }
         .card i { font-size: 1.8rem; margin-bottom: 10px; display: block; }
         .card .value { font-size: 1.6rem; font-weight: 700; }
@@ -50,10 +46,8 @@
 
         #chart-box { background: var(--bg-card); border-radius: 20px; padding: 20px; border: 1px solid var(--border-color); height: 400px; margin-bottom: 40px; }
         
-        /* Footer Style */
         footer { margin-top: 50px; padding: 20px 0; text-align: center; font-size: 0.85rem; color: var(--text-sub); border-top: 1px solid var(--border-color); }
         footer a { color: var(--safe-green); text-decoration: none; font-weight: 600; }
-        footer a:hover { text-decoration: underline; }
 
         .status-danger { border-bottom: 4px solid var(--danger-red); }
         .status-safe { border-bottom: 4px solid var(--safe-green); }
@@ -73,7 +67,7 @@
             <i class="fa-solid fa-sun fa-3x" id="w-icon" style="color:#f59e0b"></i>
             <div style="text-align: left;">
                 <div id="wt-temp" style="font-weight:700; font-size: 2rem; line-height: 1;">--°C</div>
-                <div id="wt-desc" style="color: var(--text-sub); margin-top: 5px;">กำลังโหลดพยากรณ์อากาศ...</div>
+                <div id="wt-desc" style="color: var(--text-sub); margin-top: 5px;">กำลังโหลด...</div>
             </div>
         </div>
         <div class="weather-details">
@@ -81,16 +75,15 @@
             <span>💨 ลม: <span id="wt-wind">--</span> M/S</span>
             <span>🌅 <span id="wt-rise">--</span> | 🌇 <span id="wt-set">--</span></span>
             <span id="wt-aqi">😷 AQI: --</span>
-            <span id="wt-uv">☀️ UV Index: 4</span>
         </div>
     </div>
 
     <div class="grid-sensors">
         <div class="card"><i class="fa-solid fa-temperature-three-quarters" style="color:#f59e0b"></i><h3>อุณหภูมิ</h3><div id="v-temp" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-cloud-showers-heavy" style="color:#06b6d4"></i><h3>ความชื้น</h3><div id="v-hum" class="value">--</div></div>
+        <div class="card"><i class="fa-solid fa-cloud-showers-heavy" style="color:#06b6d4"></i><h3>ความชื้นอากาศ</h3><div id="v-hum" class="value">--</div></div>
         <div id="card-soil" class="card"><i class="fa-solid fa-droplet" style="color:#3b82f6"></i><h3>ความชื้นดิน</h3><div id="v-soil" class="value">--</div></div>
         <div class="card"><i class="fa-solid fa-wind" style="color:#8b5cf6"></i><h3>VPD</h3><div id="v-vpd" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-bell" style="color:var(--danger-red)"></i><h3>สถานะแจ้งเตือน</h3><div id="v-alert" class="value" style="font-size:1.1rem">--</div></div>
+        <div class="card"><i class="fa-solid fa-bell" style="color:var(--danger-red)"></i><h3>การแจ้งเตือน</h3><div id="v-alert" class="value" style="font-size:1rem">--</div></div>
     </div>
 
     <h2 style="font-size: 1rem; color: var(--text-sub); text-align:center; margin-bottom: 20px;">🔌 แผงควบคุมอุปกรณ์</h2>
@@ -107,14 +100,14 @@
 
     <footer>
         Smart Farmer Dashboard by Suchin | 
-        <a href="https://sites.google.com/view/hin-tang/home" target="_blank">ลิงก์เว็บไซต์</a>
+        <a href="https://sites.google.com/view/hin-tang/home" target="_blank">Tanya Smart Farm</a>
     </footer>
 </div>
 
 <script>
     const CONFIG = {
         TOKEN: "Yom2XPXZ-ieotsOgS4gGc5-UHmfV2oin",
-        SERVER: "http://blynk2.iot-cm.com:8080",
+        SERVER: "https://blynk2.iot-cm.com:9443", // ใช้ HTTPS Port 9443
         W_KEY: "02868cd5e15cf0f70bfe001a9822c367",
         CITY: "1153081"
     };
@@ -127,14 +120,14 @@
             title: { text: '' },
             xAxis: { type: 'datetime' },
             yAxis: [
-                { title: { text: 'อุณหภูมิ & ดิน' }, height: '50%' },
-                { title: { text: 'ความชื้น & VPD' }, top: '55%', height: '45%', offset: 0 }
+                { title: { text: 'อุณหภูมิ/ดิน' }, height: '50%' },
+                { title: { text: 'ความชื้น/VPD' }, top: '55%', height: '45%', offset: 0 }
             ],
             series: [
-                { name: 'อุณหภูมิ', data: [], color: '#f59e0b' },
-                { name: 'ความชื้นสัมพัทธ์', data: [], color: '#06b6d4', yAxis: 1 },
-                { name: 'ความชื้นดิน', data: [], color: '#3b82f6' },
-                { name: 'VPD', data: [], color: '#8b5cf6', yAxis: 1 }
+                { name: 'อุณหภูมิ (V1)', data: [], color: '#f59e0b' },
+                { name: 'ความชื้นสัมพัทธ์ (V2)', data: [], color: '#06b6d4', yAxis: 1 },
+                { name: 'ความชื้นดิน (V4)', data: [], color: '#3b82f6' },
+                { name: 'VPD (V7)', data: [], color: '#8b5cf6', yAxis: 1 }
             ],
             credits: { enabled: false }
         });
@@ -152,12 +145,11 @@
             document.getElementById('wt-rise').innerText = formatTime(d.sys.sunrise);
             document.getElementById('wt-set').innerText = formatTime(d.sys.sunset);
 
-            // Fetch AQI
             const rAqi = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${d.coord.lat}&lon=${d.coord.lon}&appid=${CONFIG.W_KEY}`);
             const dAqi = await rAqi.json();
             const aqiLevels = ["", "ดีมาก", "ดี", "ปานกลาง", "แย่", "แย่มาก"];
             document.getElementById('wt-aqi').innerText = `😷 AQI: ${dAqi.list[0].main.aqi} (${aqiLevels[dAqi.list[0].main.aqi]})`;
-        } catch(e) {}
+        } catch(e) { console.log("Weather Error"); }
     }
 
     async function syncSystem() {
@@ -167,23 +159,39 @@
             {p:'V8', id:'v-alert', unit:'', idx:-1}
         ];
         let time = (new Date()).getTime();
+        
         for(let s of mapping) {
             try {
                 const res = await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/get/${s.p}`);
                 const data = await res.json();
-                const val = data[0];
+                const val = Array.isArray(data) ? data[0] : data;
+                
                 document.getElementById(s.id).innerText = val + s.unit;
-                if(s.idx !== -1) mainChart.series[s.idx].addPoint([time, parseFloat(val)], true, mainChart.series[s.idx].data.length > 50);
-                if(s.p === 'V4') document.getElementById('card-soil').className = val < 30 ? 'card status-danger' : 'card status-safe';
-            } catch(e) {}
+                
+                // Update Graph
+                if(s.idx !== -1 && !isNaN(parseFloat(val))) {
+                    mainChart.series[s.idx].addPoint([time, parseFloat(val)], true, mainChart.series[s.idx].data.length > 30);
+                }
+                
+                // Color Code for Soil
+                if(s.p === 'V4') {
+                    document.getElementById('card-soil').className = parseFloat(val) < 30 ? 'card status-danger' : 'card status-safe';
+                }
+            } catch(e) { console.log("Sync Error: " + s.p); }
         }
+
+        // Sync Buttons
         ['V10','V11','V12','V13','V14'].forEach(async p => {
             try {
                 const res = await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/get/${p}`);
                 const data = await res.json();
+                const val = Array.isArray(data) ? data[0] : data;
                 const btn = document.getElementById(`sw-${p}`);
-                if(parseInt(data[0]) === 1) { btn.className = 'btn-sw active'; btn.innerText = 'RUNNING'; }
-                else { btn.className = 'btn-sw'; btn.innerText = 'OFF'; }
+                if(parseInt(val) === 1) { 
+                    btn.className = 'btn-sw active'; btn.innerText = 'RUNNING'; 
+                } else { 
+                    btn.className = 'btn-sw'; btn.innerText = 'OFF'; 
+                }
             } catch(e) {}
         });
     }
@@ -191,8 +199,10 @@
     async function actuate(pin) {
         const btn = document.getElementById(`sw-${pin}`);
         const next = btn.classList.contains('active') ? 0 : 1;
-        await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/update/${pin}?value=${next}`);
-        syncSystem();
+        try {
+            await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/update/${pin}?value=${next}`);
+            setTimeout(syncSystem, 500);
+        } catch(e) { alert("การเชื่อมต่อล้มเหลว"); }
     }
 
     function toggleTheme() {
@@ -206,7 +216,7 @@
         setupChart();
         updateWeather();
         syncSystem();
-        setInterval(syncSystem, 5000);
+        setInterval(syncSystem, 10000); // อัปเดตทุก 10 วินาที
         setInterval(updateWeather, 600000);
     };
 </script>
