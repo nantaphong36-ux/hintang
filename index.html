@@ -2,252 +2,230 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Farmer Dashboard by Suchin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TANYA MODERN GREY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&family=Roboto:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    
     <style>
         :root {
-            --bg-body: #f8fafc; --bg-card: #ffffff; --bg-grey: #f1f5f9;
-            --text-main: #0f172a; --text-sub: #64748b; --border-color: #e2e8f0;
-            --safe-green: #10b981; --info-blue: #3b82f6; --danger-red: #ef4444;
-            --warning-orange: #f59e0b;
-        }
-        [data-theme="dark"] {
-            --bg-body: #0f172a; --bg-card: #1e293b; --bg-grey: #334155;
-            --text-main: #f1f5f9; --text-sub: #94a3b8; --border-color: #334155;
+            --bg-light: #f4f7f6; --card-white: #ffffff;
+            --main-green: #2ecc71; --main-orange: #f39c12;
+            --text-main: #2d3436; --text-sub: #636e72; --border-color: #e0e0e0;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        header { text-align: center; margin-bottom: 30px; position: relative; }
-        .theme-btn { position: absolute; right: 0; top: 0; width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; color: var(--text-main); }
+        body { font-family: 'Prompt', sans-serif; background: var(--bg-light); margin: 0; padding: 15px; color: var(--text-main); }
 
-        .weather-panel { 
-            background: var(--bg-card); padding: 20px; border-radius: 20px; 
-            border: 1px solid var(--border-color); margin-bottom: 25px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        /* Header */
+        .header-container {
+            background: var(--card-white); border-radius: 15px; padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--border-color);
         }
-        .ai-box { background: var(--bg-grey); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 0.9rem; border-left: 5px solid var(--info-blue); line-height: 1.6; text-align: left; }
-        
-        /* Grid Sensors ปรับให้รองรับ 8 Cards */
-        .grid-sensors { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .grid-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .logo-box img { height: 40px; }
 
-        .card { background: var(--bg-card); border-radius: 18px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: 0.3s; position: relative; }
-        .card .value { font-size: 1.4rem; font-weight: 700; margin-top: 5px; }
-        .card h3 { font-size: 0.7rem; text-transform: uppercase; color: var(--text-sub); margin: 5px 0; }
+        /* Weather Card */
+        .weather-card {
+            background: var(--card-white); border-radius: 15px; padding: 15px; margin-bottom: 15px;
+            border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;
+        }
 
-        .btn-sw { width: 100%; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; background: var(--bg-grey); color: var(--text-sub); }
-        .btn-sw.active { background: var(--safe-green); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        /* Master Switch V0 - ปรับแต่งสีและการกด */
+        .v0-card {
+            background: var(--card-white); border-radius: 15px; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; border-left: 6px solid #ccc;
+            transition: 0.3s all ease; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+        }
+        /* สถานะเมื่อเป็น AUTO (สีเขียว) */
+        .v0-card.mode-auto { border-left-color: var(--main-green); background: #f0fff4; }
+        .v0-card.mode-auto .v0-val { color: var(--main-green); }
+        .v0-card.mode-auto .fa-power-off { color: var(--main-green); }
 
-        #chart-box { background: var(--bg-card); border-radius: 20px; padding: 20px; border: 1px solid var(--border-color); height: 400px; margin-bottom: 40px; }
-        
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .critical { animation: pulse-red 2s infinite; border-color: var(--danger-red) !important; }
+        /* สถานะเมื่อเป็น MANUAL (สีส้ม) */
+        .v0-card.mode-manual { border-left-color: var(--main-orange); background: #fffaf0; }
+        .v0-card.mode-manual .v0-val { color: var(--main-orange); }
+        .v0-card.mode-manual .fa-power-off { color: var(--main-orange); }
 
-        footer { margin-top: 50px; padding: 20px 0; text-align: center; font-size: 0.85rem; color: var(--text-sub); border-top: 1px solid var(--border-color); }
+        .v0-label { font-size: 14px; font-weight: 600; }
+        .v0-val { font-size: 12px; font-weight: 700; transition: 0.3s; }
+
+        /* Grid & Cards */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card {
+            background: var(--card-white); border-radius: 15px; padding: 12px;
+            height: 90px; border: 1px solid var(--border-color); position: relative; overflow: hidden;
+        }
+        .card-label { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
+        .card-value { font-family: 'Roboto', sans-serif; font-size: 1.8rem; font-weight: 700; margin-top: 5px; }
+        .chart-bg { position: absolute; right: 0; bottom: 0; width: 70%; height: 50px; opacity: 0.6; }
+
+        /* Control Buttons */
+        .btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 25px; }
+        .btn-item {
+            aspect-ratio: 1; background: var(--card-white); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: #bdc3c7; border: 1px solid var(--border-color); transition: 0.3s;
+        }
+        .btn-item.active { background: var(--main-green); color: white; border-color: var(--main-green); }
+
+        .footer { text-align: center; font-size: 10px; color: var(--text-sub); margin-top: 20px; }
     </style>
 </head>
-<body data-theme="light">
+<body>
 
-<div class="container">
-    <header>
-        <h1 style="margin:0; font-size: 2rem;">🌿 Smart Farm Pro</h1>
-        <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 5px;">
-             <i class="fas fa-wifi"></i> Signal: <span id="v-wifi">--</span> dBm | <span id="last-update">อัปเดต: --</span>
+    <div class="header-container">
+        <div class="logo-box"><img src="https://img5.pic.in.th/file/secure-sv1/logo-x.png" alt="Logo"></div>
+        <div style="text-align: right;">
+            <div style="font-size: 10px; font-weight: 600; color: var(--main-green);"><i class="fas fa-circle"></i> Online</div>
+            <div id="time" style="font-size: 10px; color: var(--text-sub);">00:00:00</div>
         </div>
-        <button class="theme-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-    </header>
+    </div>
 
-    <div class="weather-panel">
-        <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <i class="fa-solid fa-sun fa-3x" id="w-icon" style="color:#f59e0b"></i>
-                <div id="wt-temp" style="font-weight:700; font-size: 2.2rem;">--°C</div>
+    <div class="weather-card">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="w-icon" style="font-size: 2rem;"><i class="fas fa-cloud"></i></div>
+            <div>
+                <div id="w-temp" style="font-size: 1.5rem; font-weight: 700;">--°C</div>
+                <div id="w-desc" style="font-size: 12px; color: var(--text-sub);">เมฆเป็นส่วนมาก</div>
             </div>
-            <div style="text-align: left; font-size: 0.9rem;">
-                <div>💧 ชื้นอากาศ: <span id="wt-hum">--</span>%</div>
-                <div>💨 ลม: <span id="wt-wind">--</span> m/s</div>
-            </div>
-            <div id="wt-aqi" style="padding: 8px 15px; border-radius: 10px; background: var(--bg-grey); font-weight: 600;">AQI: --</div>
         </div>
-        
-        <div class="ai-box">
-            <strong><i class="fas fa-robot" style="color: var(--info-blue);"></i> AI วิเคราะห์:</strong> 
-            <span id="ai-advice">กำลังตรวจสอบระบบ...</span>
+        <div style="font-size: 11px; text-align: right;">
+            <div><i class="fas fa-tint"></i> <span id="w-hum">--</span>%</div>
+            <div><i class="fas fa-wind"></i> <span id="w-wind">--</span> m/s</div>
+            <div style="color: var(--main-green); font-weight: 600;">THA MUANG</div>
         </div>
     </div>
 
-    <div class="grid-sensors">
-        <div class="card"><i class="fa-solid fa-temperature-three-quarters" style="color:var(--warning-orange)"></i><h3>อุณหภูมิ</h3><div id="v-temp" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-cloud-showers-heavy" style="color:#06b6d4"></i><h3>ความชื้นอากาศ</h3><div id="v-hum" class="value">--</div></div>
-        <div class="card" id="card-v4"><i class="fa-solid fa-droplet" style="color:var(--info-blue)"></i><h3>ความชื้นดิน</h3><div id="v-soil" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-wind" style="color:#8b5cf6"></i><h3>VPD Value</h3><div id="v-vpd" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-gauge-high" style="color:#10b981"></i><h3>ความกดอากาศ</h3><div id="v-pres" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-mountain" style="color:#64748b"></i><h3>ความสูง</h3><div id="v-alt" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-icicles" style="color:#3b82f6"></i><h3>จุดน้ำค้าง</h3><div id="v-dew" class="value">--</div></div>
-        <div class="card"><i class="fa-solid fa-bell" style="color:var(--danger-red)"></i><h3>สถานะแจ้งเตือน</h3><div id="v-alert" class="value" style="font-size:0.9rem">--</div></div>
+    <div id="v0-container" class="v0-card" onclick="toggleV0()">
+        <div>
+            <div class="v0-label">โหมดการทำงาน</div>
+            <div id="v0-state" class="v0-val">กำลังโหลด...</div>
+        </div>
+        <i class="fas fa-power-off"></i>
     </div>
 
-    <h2 style="font-size: 1rem; color: var(--text-sub); text-align:center; margin-bottom: 20px;">🔌 แผงควบคุมอุปกรณ์</h2>
-    <div class="grid-controls">
-        <div class="card"><h3>ปั๊มน้ำ 1</h3><button id="sw-V10" class="btn-sw" onclick="actuate('V10')">OFF</button></div>
-        <div class="card"><h3>ปั๊มน้ำ 2</h3><button id="sw-V11" class="btn-sw" onclick="actuate('V11')">OFF</button></div>
-        <div class="card"><h3>พัดลมระบาย</h3><button id="sw-V12" class="btn-sw" onclick="actuate('V12')">OFF</button></div>
-        <div class="card"><h3>พ่นหมอก</h3><button id="sw-V13" class="btn-sw" onclick="actuate('V13')">OFF</button></div>
-        <div class="card"><h3>ระบบแสงสว่าง</h3><button id="sw-V14" class="btn-sw" onclick="actuate('V14')">OFF</button></div>
+    <div class="grid">
+        <div class="card"><div class="card-label">อุณหภูมิ</div><div class="card-value" id="v1" style="color: #e74c3c;">--</div><div class="chart-bg" id="ch1"></div></div>
+        <div class="card"><div class="card-label">ความชื้น</div><div class="card-value" id="v2" style="color: #3498db;">--</div><div class="chart-bg" id="ch2"></div></div>
+        <div class="card"><div class="card-label">ความชื้นดิน</div><div class="card-value" id="v4" style="color: var(--main-green);">--</div><div class="chart-bg" id="ch4"></div></div>
+        <div class="card"><div class="card-label">ค่า VPD</div><div class="card-value" id="v7" style="color: #f39c12;">--</div><div class="chart-bg" id="ch7"></div></div>
     </div>
 
-    <div id="chart-box"></div>
+    <div class="btn-grid">
+        <div id="swV10" class="btn-item" onclick="actuate('V10')"><i class="fas fa-tint"></i></div>
+        <div id="swV11" class="btn-item" onclick="actuate('V11')"><i class="fas fa-faucet"></i></div>
+        <div id="swV12" class="btn-item" onclick="actuate('V12')"><i class="fas fa-fan"></i></div>
+        <div id="swV13" class="btn-item" onclick="actuate('V13')"><i class="fas fa-spray-can"></i></div>
+        <div id="swV14" class="btn-item" onclick="actuate('V14')"><i class="fas fa-lightbulb"></i></div>
+    </div>
 
-    <footer>
-        Smart Farmer Dashboard by Suchin | <a href="https://sites.google.com/view/hin-tang/home" target="_blank">Tanya Smart Farm</a>
-    </footer>
-</div>
+    <div class="footer">TANYA SMART FARMING SYSTEM</div>
 
 <script>
-    const CONFIG = {
-        TOKEN: "Yom2XPXZ-ieotsOgS4gGc5-UHmfV2oin",
-        SERVER: "https://blynk2.iot-cm.com:9443",
+    const CFG = { 
+        T: "Yom2XPXZ-ieotsOgS4gGc5-UHmfV2oin", 
+        S: "https://blynk2.iot-cm.com:9443",
         W_KEY: "02868cd5e15cf0f70bfe001a9822c367",
         CITY: "1153081"
     };
+    let charts = {}; let currentV0 = 0;
 
-    let mainChart;
-    let farmData = { temp: 0, hum: 0, soil: 0, vpd: 0, pres: 0 };
+    // แปลสภาพอากาศเบื้องต้น
+    const weatherTranslation = {
+        "broken clouds": "เมฆเป็นส่วนมาก",
+        "clear sky": "ท้องฟ้าแจ่มใส",
+        "few clouds": "มีเมฆบางส่วน",
+        "scattered clouds": "เมฆกระจายตัว",
+        "shower rain": "ฝนโปรยปราย",
+        "rain": "ฝนตก",
+        "thunderstorm": "พายุฝนฟ้าคะนอง",
+        "mist": "หมอกลง"
+    };
 
-    function setupChart() {
-        mainChart = new Highcharts.Chart({
-            chart: { renderTo: 'chart-box', backgroundColor: 'transparent', type: 'spline' },
-            title: { text: '' },
-            xAxis: { type: 'datetime' },
-            yAxis: [
-                { title: { text: 'เซนเซอร์หลัก' }, height: '48%' },
-                { title: { text: 'เซนเซอร์รอง' }, top: '55%', height: '45%', offset: 0 }
-            ],
-            series: [
-                { name: 'Temp', data: [], color: '#f59e0b' },
-                { name: 'Hum', data: [], color: '#06b6d4', yAxis: 1 },
-                { name: 'Soil', data: [], color: '#3b82f6' },
-                { name: 'VPD', data: [], color: '#8b5cf6', yAxis: 1 }
-            ],
-            credits: { enabled: false }
+    function initChart(id, color) {
+        return new Highcharts.Chart({
+            chart: { renderTo: id, type: 'areaspline', backgroundColor: 'transparent', margin: [0, 0, 0, 0] },
+            title: { text: '' }, xAxis: { visible: false }, yAxis: { visible: false },
+            plotOptions: { areaspline: { fillColor: { linearGradient: [0, 0, 0, 40], stops: [[0, color + '15'], [1, color + '00']] }, lineWidth: 2, lineColor: color, marker: { enabled: false } } },
+            series: [{ data: [], showInLegend: false }], credits: { enabled: false }
         });
     }
 
-    async function syncSystem() {
-        // เพิ่ม V3, V5, V6 เข้าไปใน Mapping
-        const mapping = [
-            {p:'V1', id:'v-temp', unit:'°C', idx:0}, {p:'V2', id:'v-hum', unit:'%', idx:1},
-            {p:'V4', id:'v-soil', unit:'%', idx:2}, {p:'V7', id:'v-vpd', unit:'', idx:3},
-            {p:'V3', id:'v-pres', unit:' hPa', idx:-1}, {p:'V5', id:'v-alt', unit:' m', idx:-1},
-            {p:'V6', id:'v-dew', unit:'°C', idx:-1},
-            {p:'V8', id:'v-alert', unit:'', idx:-1}, {p:'V0', id:'v-wifi', unit:'', idx:-1}
-        ];
-        let time = (new Date()).getTime();
-        document.getElementById('last-update').innerText = "อัปเดต: " + new Date().toLocaleTimeString();
-
-        for(let s of mapping) {
-            try {
-                const res = await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/get/${s.p}`);
-                const data = await res.json();
-                const val = Array.isArray(data) ? data[0] : data;
-                const numVal = parseFloat(val);
-                
-                document.getElementById(s.id).innerText = val + s.unit;
-
-                if(s.p === 'V1') farmData.temp = numVal;
-                if(s.p === 'V2') farmData.hum = numVal;
-                if(s.p === 'V4') farmData.soil = numVal;
-                if(s.p === 'V7') farmData.vpd = numVal;
-
-                // Warning Pulse
-                if(s.p === 'V4') {
-                    const card = document.getElementById('card-v4');
-                    if(numVal < 30) card.classList.add('critical'); else card.classList.remove('critical');
-                }
-
-                if(s.idx !== -1 && !isNaN(numVal)) {
-                    mainChart.series[s.idx].addPoint([time, numVal], true, mainChart.series[s.idx].data.length > 40);
-                }
-            } catch(e) {}
-        }
-
-        // Sync Buttons
-        ['V10','V11','V12','V13','V14'].forEach(async p => {
-            try {
-                const res = await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/get/${p}`);
-                const data = await res.json();
-                const val = Array.isArray(data) ? data[0] : data;
-                const btn = document.getElementById(`sw-${p}`);
-                if(parseInt(val) === 1) { btn.className = 'btn-sw active'; btn.innerText = 'RUNNING'; }
-                else { btn.className = 'btn-sw'; btn.innerText = 'OFF'; }
-            } catch(e) {}
-        });
-
-        updateAIAdvice();
-    }
-
-    function updateAIAdvice() {
-        let advices = [];
-
-        // 1. วิเคราะห์อุณหภูมิ
-        if(farmData.temp > 35) advices.push("🌡️ อุณหภูมิร้อนจัด ควรเปิดพัดลมหรือพ่นหมอก");
-        
-        // 2. วิเคราะห์ VPD (V7)
-        if (farmData.vpd > 1.5) {
-            advices.push("🔥 VPD สูงเกินไป (อากาศแห้งจัด) พืชอาจคายน้ำมาก แนะนำเปิดพ่นหมอก");
-        } else if (farmData.vpd < 0.5 && farmData.vpd > 0) {
-            advices.push("❄️ VPD ต่ำเกินไป (อากาศชื้นจัด) ระวังเชื้อรา แนะนำเปิดพัดลม");
-        }
-
-        // 3. วิเคราะห์ดิน (V4) - แก้ไขให้ตรวจสอบแม้เป็น 0
-        if (farmData.soil < 30) {
-            advices.push("💧 ความชื้นดินต่ำเกินไป (" + farmData.soil + "%) ควรเปิดปั๊มน้ำรดน้ำด่วน");
-        }
-
-        // 4. วิเคราะห์ความชื้นอากาศ
-        if (farmData.hum > 90) advices.push("☁️ ความชื้นอากาศสูงมาก พืชจะหยุดคายน้ำ");
-
-        // แสดงผล
-        const finalAdvice = advices.length > 0 ? advices.join(" | ") : "✅ สภาวะฟาร์มปกติ พืชกำลังเติบโตได้ดี";
-        document.getElementById('ai-advice').innerHTML = finalAdvice;
-    }
-
-    async function actuate(pin) {
-        const btn = document.getElementById(`sw-${pin}`);
-        const next = btn.classList.contains('active') ? 0 : 1;
-        await fetch(`${CONFIG.SERVER}/${CONFIG.TOKEN}/update/${pin}?value=${next}`);
-        setTimeout(syncSystem, 800);
-    }
-
-    async function updateWeather() {
+    async function getWeather() {
         try {
-            const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?id=${CONFIG.CITY}&appid=${CONFIG.W_KEY}&units=metric&lang=th`);
-            const d = await r.json();
-            document.getElementById('wt-temp').innerText = `${Math.round(d.main.temp)}°C`;
-            document.getElementById('wt-hum').innerText = d.main.humidity;
-            document.getElementById('wt-wind').innerText = d.wind.speed;
-        } catch(e) {}
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?id=${CFG.CITY}&appid=${CFG.W_KEY}&units=metric`);
+            const data = await response.json();
+            document.getElementById('w-temp').innerText = Math.round(data.main.temp) + "°C";
+            document.getElementById('w-hum').innerText = data.main.humidity;
+            document.getElementById('w-wind').innerText = data.wind.speed;
+            
+            const desc = data.weather[0].description;
+            document.getElementById('w-desc').innerText = weatherTranslation[desc] || desc;
+            
+            const iconCode = data.weather[0].icon;
+            document.getElementById('w-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}.png" style="width:50px;">`;
+        } catch (e) {}
     }
 
-    function toggleTheme() {
-        const b = document.body;
-        const isL = b.getAttribute('data-theme') === 'light';
-        b.setAttribute('data-theme', isL ? 'dark' : 'light');
-        document.querySelector('.theme-btn i').className = isL ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    async function sync() {
+        const pins = ['V0','V1','V2','V4','V7','V10','V11','V12','V13','V14'];
+        const now = (new Date()).getTime();
+        for(let p of pins) {
+            try {
+                const res = await fetch(`${CFG.S}/${CFG.T}/get/${p}`);
+                const val = (await res.json())[0];
+                const n = parseFloat(val);
+                
+                if(p === 'V0') {
+                    currentV0 = parseInt(val);
+                    const container = document.getElementById('v0-container');
+                    const label = document.getElementById('v0-state');
+                    
+                    if(currentV0 === 0) { // AUTO
+                        label.innerText = 'ระบบอัตโนมัติ (AUTO)';
+                        container.className = 'v0-card mode-auto';
+                    } else { // MANUAL
+                        label.innerText = 'ควบคุมเอง (MANUAL)';
+                        container.className = 'v0-card mode-manual';
+                    }
+                } else if(p.startsWith('V1') && p.length > 2) {
+                    const btn = document.getElementById('sw'+p);
+                    if(parseInt(val) === 1) btn.classList.add('active'); else btn.classList.remove('active');
+                } else {
+                    const el = document.getElementById(p.toLowerCase());
+                    if(el) el.innerText = val;
+                    const cIdx = p.substring(1);
+                    if(charts['c'+cIdx]) charts['c'+cIdx].series[0].addPoint([now, n], true, charts['c'+cIdx].series[0].data.length > 10);
+                }
+            } catch(e){}
+        }
+        document.getElementById('time').innerText = new Date().toLocaleTimeString();
+    }
+
+    async function toggleV0() {
+        const nextState = currentV0 === 0 ? 1 : 0;
+        await fetch(`${CFG.S}/${CFG.T}/update/V0?value=${nextState}`);
+        sync();
+    }
+
+    async function actuate(p) {
+        if(currentV0 === 0) {
+            alert("กรุณาเปลี่ยนเป็นโหมด MANUAL ก่อนควบคุมอุปกรณ์");
+            return;
+        }
+        const state = document.getElementById('sw'+p).classList.contains('active') ? 0 : 1;
+        await fetch(`${CFG.S}/${CFG.T}/update/${p}?value=${state}`);
+        setTimeout(sync, 800);
     }
 
     window.onload = () => {
-        setupChart();
-        updateWeather();
-        syncSystem();
-        setInterval(syncSystem, 10000);
-        setInterval(updateWeather, 600000);
+        const colors = {1:'#e74c3c', 2:'#3498db', 4:'#2ecc71', 7:'#f39c12'};
+        [1,2,4,7].forEach((v) => { charts['c'+v] = initChart('ch'+v, colors[v]); });
+        getWeather(); sync();
+        setInterval(sync, 10000);
+        setInterval(getWeather, 600000);
     };
 </script>
 </body>
