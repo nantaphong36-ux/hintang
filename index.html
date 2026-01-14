@@ -2,251 +2,213 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TANAPONG SMART FARM PRO V12</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tanya Smart Farm Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
     <style>
-        :root { --danger: #FF0000; --warning: #FFA500; --success: #23C48E; --low: #3399FF; --bg: #f1f5f9; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 10px; margin: 0; color: #1e293b; }
-        .header { background: #fff; padding: 15px; border-radius: 0 0 20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
-        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #fff; margin-bottom: 10px; font-size: 12px; font-weight: 700; border-radius: 10px; margin-top: 5px; }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .online { background-color: #23C48E; box-shadow: 0 0 8px #23C48E; }
-        .offline { background-color: #FF0000; box-shadow: 0 0 8px #FF0000; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        :root {
+            --bg: #0f172a; --card: rgba(255, 255, 255, 0.07);
+            --accent: #00d2ff; --text: #ffffff; --glass-border: rgba(255, 255, 255, 0.1);
+            --danger: #ff4757; --safe: #2ed573;
+        }
+        body.light-mode {
+            --bg: #f0f2f5; --card: rgba(255, 255, 255, 0.9);
+            --accent: #0284c7; --text: #1a1d26; --glass-border: rgba(0, 0, 0, 0.1);
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Prompt', sans-serif; margin: 0; padding: 5px; transition: 0.5s; overflow-x: hidden; }
+        .container { width: 100%; max-width: 800px; margin: auto; min-height: 100vh; display: flex; flex-direction: column; }
 
-        .section-title { text-align: left; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 5px 10px; border-left: 3px solid #3b82f6; padding-left: 8px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; }
-        .card { background: white; border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .card i, .emoji { font-size: 32px; margin-bottom: 5px; }
-        .card .val { font-size: 26px; font-weight: 800; margin: 0; }
-        .card .unit { font-size: 11px; color: #64748b; font-weight: 600; }
-        .status-label { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 20px; width: 95%; margin-top: 8px; text-align: center; }
+        .header-box { background: var(--card); backdrop-filter: blur(10px); padding: 15px 10px; border-radius: 20px; text-align: center; margin-bottom: 8px; border: 1px solid var(--glass-border); position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header-text h1 { margin: 0; font-size: 0.95rem; font-weight: 600; }
+        .header-text p { margin: 0; font-size: 0.65rem; opacity: 0.7; color: var(--accent); }
 
-        .summary-box { background: white; border-radius: 16px; padding: 15px; margin-top: 10px; border: 1px solid #e2e8f0; }
-        .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-        .summary-table th { text-align: left; color: #94a3b8; padding-bottom: 5px; }
-        .summary-table td { padding: 5px 0; font-weight: 700; }
+        .controls-top { position: absolute; top: 8px; right: 15px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .theme-toggle { background: none; border: none; color: var(--text); cursor: pointer; font-size: 1.1rem; padding: 0; }
+        .wifi-status { font-size: 0.65rem; color: var(--accent); display: flex; align-items: center; gap: 4px; font-weight: 600; }
 
-        .color-safe { color: var(--success) !important; }
-        .color-warn { color: var(--warning) !important; }
-        .color-danger { color: var(--danger) !important; }
-        .color-low { color: var(--low) !important; }
-        .bg-low { background: #e0f2fe; color: var(--low); }
-        .bg-safe { background: #dcfce7; color: var(--success); }
-        .bg-warn { background: #ffedd5; color: var(--warning); }
-        .bg-danger { background: #fee2e2; color: var(--danger); }
+        .glass-card { background: var(--card); backdrop-filter: blur(15px); padding: 12px; border-radius: 25px; border: 1px solid var(--glass-border); margin-bottom: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 
-        .btn-toggle { border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
-        .btn-excel { background: #4CAF; color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 700; width: 100%; margin-top: 10px; cursor: pointer; font-size: 13px; }
-        .btn-excel i { margin-right: 8px; }
-        .chart-box { background: white; border-radius: 16px; padding: 12px; margin-top: 5px; border: 1px solid #e2e8f0; min-height: 250px; }
+        .weather-sub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 0.65rem; margin-top: 10px; border-top: 1px solid var(--glass-border); padding-top: 10px; }
+        .weather-sub div { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+
+        .s-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+        .s-box { background: #fff; padding: 10px 2px; border-radius: 18px; text-align: center; color: #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .s-box i { font-size: 1rem; display: block; margin-bottom: 3px; }
+        .s-box b { font-size: 0.85rem; display: block; }
+
+        .r-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .r-btn { background: var(--card); border: 1px solid var(--glass-border); padding: 15px 2px; border-radius: 20px; color: var(--text); cursor: pointer; width: 100%; transition: 0.3s; }
+        .active-tap { background: #3b82f6 !important; }
+        .active-spray { background: #00d2ff !important; }
+        .active-fan { background: #22c55e !important; }
+        .active-roof { background: #facc15 !important; color: #000 !important; }
+        
+        .mode-btn { font-size: 0.55rem; padding: 4px; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border); cursor: pointer; margin-bottom: 5px; width: 100%; }
+        .mode-active { background: var(--safe); border: none; font-weight: 600; }
+
+        .footer { margin-top: auto; padding: 15px 10px; text-align: center; font-size: 0.6rem; opacity: 0.6; line-height: 1.6; }
     </style>
 </head>
-<body>
+<body class="dark-mode">
 
-    <div class="header">
-        <h2 style="margin:0; font-size: 20px;">🌿 TANYA SMART FARM</h2>
-    </div>
-
-    <div class="status-bar">
-        <div id="connection-status"><span class="dot online"></span><span id="status-text">SYSTEM ONLINE</span></div>
-        <div id="last-update">กำลังซิงค์...</div>
-    </div>
-
-    <div class="section-title">สถานะเซนเซอร์</div>
-    <div class="grid">
-        <div class="card" id="card-1"><i id="ic-1" class="fas fa-thermometer-half"></i><span class="val" id="val-1">--</span><span class="unit">อุณหภูมิ (°C)</span></div>
-        <div class="card" id="card-2"><i id="ic-2" class="fas fa-tint"></i><span class="val" id="val-2">--</span><span class="unit">ความชื้นอากาศ (%)</span></div>
-        
-        <div class="card" id="card-4">
-            <i id="ic-4" class="fas fa-seedling"></i>
-            <span class="val" id="val-4">--</span>
-            <span class="unit">ความชื้นดิน (%)</span>
-            <div id="soil-status" class="status-label">รอวิเคราะห์...</div>
+<div class="container">
+    <div class="header-box">
+        <img src="https://img5.pic.in.th/file/secure-sv1/leaf50x50.png" width="28">
+        <div class="header-text"><h1>TANYA SMART FARM PRO</h1><p>ท่าม่วง, กาญจนบุรี</p></div>
+        <div class="controls-top">
+            <div class="wifi-status"><i class="fa-solid fa-wifi"></i> <span id="wifi-val">--</span></div>
+            <button class="theme-toggle" onclick="toggleTheme()"><i id="th-icon" class="fa-solid fa-moon"></i></button>
         </div>
+    </div>
 
-        <div class="card" id="card-5"><i id="ic-5" class="fas fa-smog"></i><span class="val" id="val-5">--</span><span class="unit">eCO2 (ppm)</span></div>
-        <div class="card" id="card-6"><i id="ic-6" class="fas fa-biohazard"></i><span class="val" id="val-6">--</span><span class="unit">TVOC (ppb)</span></div>
-        <div class="card" id="card-7"><i id="ic-7" class="fas fa-cloud-rain"></i><span class="val" id="val-7">--</span><span class="unit">ระดับฝน (%)</span></div>
-        
-        <div class="card" id="card-3">
-            <span id="emoji-vpd" class="emoji">😊</span>
-            <span class="val" id="val-3">--</span>
-            <span class="unit">VPD (kPa)</span>
-            <div id="stage-vpd" class="status-label">Checking...</div>
+    <div class="glass-card">
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
+            <img id="w-icon" src="https://openweathermap.org/img/wn/01d@2x.png" width="75">
+            <div id="ext-temp" style="font-size:2.8rem; font-weight:600;">--°C</div>
         </div>
-
-        <div class="card" id="card-8"><i id="ic-8" class="fas fa-sun"></i><span class="val" id="val-8">--</span><span class="unit">แสงสว่าง (%)</span></div>
+        <div class="weather-sub">
+            <div><span style="opacity:0.7">💧 ชื้นอากาศ</span><b id="ext-hum">--%</b></div>
+            <div><span style="opacity:0.7">💨 ลม</span><b id="ext-wind">--m/s</b></div>
+            <div><span style="opacity:0.7">☀️ UV Index</span><b id="ext-uv">--</b></div>
+            <div><span style="opacity:0.7">🌅 ขึ้น</span><b id="sunrise">--:--</b></div>
+            <div><span style="opacity:0.7">🌇 ตก</span><b id="sunset">--:--</b></div>
+            <div><span style="opacity:0.7">😷 AQI</span><b id="ext-aqi">--</b></div>
+        </div>
     </div>
 
-    <div class="summary-box">
-        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">📊 สรุปรายงาน & ดาวน์โหลด</div>
-        <table class="summary-table">
-            <tr><th>Temp Avg</th><th>Soil Avg</th><th>VPD Avg</th></tr>
-            <tr><td id="avg-temp">-- °C</td><td id="avg-soil">-- %</td><td id="avg-vpd">-- kPa</td></tr>
-        </table>
-        <button class="btn-excel" onclick="downloadExcel()"><i class="fas fa-file-excel"></i> ดาวน์โหลดข้อมูล (Excel)</button>
+    <div class="glass-card">
+        <div class="s-grid">
+            <div class="s-box"><i class="fa-solid fa-temperature-half" style="color:#ff4757"></i><span>Temp</span><b id="s-temp">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-droplet" style="color:#3498db"></i><span>Humi</span><b id="s-hum">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-seedling" style="color:#2ecc71"></i><span>Soil</span><b id="v-moist">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-wind" style="color:#1abc9c"></i><span>VPD</span><b id="s-vpd">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-sun" style="color:#f1c40f"></i><span>Light</span><b id="s-lux">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-gauge-high" style="color:#9b59b6"></i><span>Press</span><b id="s-pres">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-water" style="color:#3498db"></i><span>DewP</span><b id="s-dew">--</b></div>
+            <div class="s-box"><i class="fa-solid fa-mountain" style="color:#7f8c8d"></i><span>Alt</span><b>15</b></div>
+        </div>
     </div>
 
-    <div class="chart-box" id="chartEnv"></div>
-    <div class="chart-box" id="chartGas"></div>
-
-    <div class="section-title">ควบคุมอุปกรณ์</div>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
-        <div class="card"><span>SYSTEM MODE</span><button class="btn-toggle" id="btn-V34" onclick="btnAction('V34')">MANUAL</button></div>
-        <div class="card"><span>PUMP (V28)</span><button class="btn-toggle" id="btn-V28" onclick="btnAction('V28')">OFF</button></div>
-        <div class="card"><span>LIGHT (V12)</span><button class="btn-toggle" id="btn-V12" onclick="btnAction('V12')">OFF</button></div>
-        <div class="card"><span>ROOF (V14)</span><button class="btn-toggle" id="btn-V14" onclick="btnAction('V14')">OPEN</button></div>
+    <div class="glass-card">
+        <div class="r-grid">
+            <div><button id="tap-mode" class="mode-btn mode-active" onclick="toggleAuto()">Auto</button><button class="r-btn" id="btn-tap" onclick="btnClick('tap')"><i class="fa-solid fa-faucet-drip"></i><span>ก็อกน้ำ</span></button></div>
+            <div><div style="height:23px"></div><button class="r-btn" id="btn-spray" onclick="btnClick('spray')"><i class="fa-solid fa-spray-can"></i><span>Spray</span></button></div>
+            <div><div style="height:23px"></div><button class="r-btn" id="btn-fan" onclick="btnClick('fan')"><i class="fa-solid fa-fan"></i><span>Fan</span></button></div>
+            <div><div style="height:23px"></div><button class="r-btn" id="btn-roof" onclick="btnClick('roof')"><i class="fa-solid fa-warehouse"></i><span>หลังคา</span></button></div>
+        </div>
     </div>
+
+    <div class="footer">
+        Dashboard by Tanya & Gemini | © Copyright 2026<br>
+        อัปเดตล่าสุด: <span id="last-update">--:--:--</span>
+    </div>
+</div>
+
+<iframe id="blynk-frame" style="display:none;"></iframe>
 
 <script>
-    const tsKey = "YEYGJ3V1CV8V6OEY", tsCID = "2687634", bBase = "http://blynk2.iot-cm.com:8080/YAZf3_nX5i3sx32pFKNk6t3GBHfy4U_l";
-    let states = { V34: 1, V28: 0, V12: 0, V14: 0 };
-    let lastData = [];
+    let isAuto = true;
+    const blynkAuth = "qXn6VGKqQTkrteXQPIw66e97JkdKlg-u";
+    const blynkServer = "159.65.131.215:8080";
+    const weatherKey = "02868cd5e15cf0f70bfe001a9822c367";
 
-    // --- ฟังก์ชันดาวน์โหลด Excel ---
-    function downloadExcel() {
-        if (lastData.length === 0) return alert("ยังไม่มีข้อมูลให้ดาวน์โหลด");
-        let csv = "Time,Temp,Hum,VPD,Soil,CO2,TVOC,Rain,Light\n";
-        lastData.forEach(f => {
-            csv += `${f.created_at},${f.field1},${f.field2},${f.field3},${f.field4},${f.field5},${f.field6},${f.field7},${f.field8}\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `SmartFarm_Report_${new Date().toLocaleDateString()}.csv`);
-        a.click();
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        document.getElementById('th-icon').className = document.body.classList.contains('light-mode') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
 
-    function btnAction(pin) {
-        states[pin] = states[pin] === 0 ? 1 : 0;
-        const ifrm = document.createElement('iframe');
-        ifrm.style.display = 'none';
-        ifrm.src = `${bBase}/update/${pin}?value=${states[pin]}&t=${new Date().getTime()}`;
-        document.body.appendChild(ifrm);
-        setTimeout(() => document.body.removeChild(ifrm), 500);
-        updateButtonUI();
+    function toggleAuto() {
+        isAuto = !isAuto;
+        document.getElementById('tap-mode').innerText = isAuto ? "Auto" : "Manual";
+        document.getElementById('tap-mode').classList.toggle('mode-active');
     }
 
-    function updateButtonUI() {
-        const uiConfig = {
-            V34: { on: 'MANUAL', off: 'AUTO', onCol: '#8b5cf6', offCol: '#22c55e' },
-            V28: { on: 'ON', off: 'OFF', onCol: '#3b82f6', offCol: '#e2e8f0' },
-            V12: { on: 'ON', off: 'OFF', onCol: '#f59e0b', offCol: '#e2e8f0' },
-            V14: { on: 'CLOSE', off: 'OPEN', onCol: '#10b981', offCol: '#e2e8f0' }
-        };
-        Object.keys(uiConfig).forEach(pin => {
-            const isON = states[pin] === 1;
-            const cfg = uiConfig[pin];
-            $(`#btn-${pin}`).text(isON ? cfg.on : cfg.off).css({"background": isON ? cfg.onCol : cfg.offCol, "color": isON ? "#fff" : "#475569"});
-        });
+    function getUVLabel(uv) {
+        if (uv < 3) return { text: "ต่ำ", color: "#2ed573" };
+        if (uv < 6) return { text: "ปานกลาง", color: "#f1c40f" };
+        if (uv < 8) return { text: "สูง", color: "#e67e22" };
+        if (uv < 11) return { text: "สูงมาก", color: "#ff4757" };
+        return { text: "สูงจัด!", color: "#8e44ad" };
     }
 
-    // --- วิเคราะห์ความชื้นดิน ---
-    function updateSoilAnalysis(val) {
-        const ic = $("#ic-4"); const txt = $("#val-4"); const label = $("#soil-status");
-        ic.removeClass('color-low color-safe color-warn color-danger');
-        txt.removeClass('color-low color-safe color-warn color-danger');
-        label.removeClass('bg-low bg-safe bg-warn bg-danger');
-
-        if (val < 30) {
-            ic.addClass('color-danger'); txt.addClass('color-danger'); label.addClass('bg-danger').text("ดินแห้ง: ควรให้น้ำด่วน");
-        } else if (val <= 60) {
-            ic.addClass('color-safe'); txt.addClass('color-safe'); label.addClass('bg-safe').text("ปกติ: ความชื้นเหมาะสม");
-        } else if (val <= 80) {
-            ic.addClass('color-warn'); txt.addClass('color-warn'); label.addClass('bg-warn').text("ชื้นมาก: งดให้น้ำ");
-        } else {
-            ic.addClass('color-low'); txt.addClass('color-low'); label.addClass('bg-low').text("แฉะ: ควรระบายน้ำ");
-        }
+    function getAQILabel(aqi) {
+        const labels = {1:{text:"ดีมาก",color:"#2ed573"},2:{text:"ดี",color:"#7bed9f"},3:{text:"ปานกลาง",color:"#f1c40f"},4:{text:"เริ่มแย่",color:"#e67e22"},5:{text:"อันตราย!",color:"#ff4757"}};
+        return labels[aqi] || { text: "N/A", color: "#fff" };
     }
 
-    function applyStyle(id, val, lv1, lv2, rev=false) {
-        const ic = $(`#ic-${id}`); const text = $(`#val-${id}`);
-        ic.removeClass('color-safe color-warn color-danger'); text.removeClass('color-safe color-warn color-danger');
-        let cls = "color-safe";
-        if(!rev) { if(val >= lv2) cls = "color-danger"; else if(val >= lv1) cls = "color-warn"; }
-        else { if(val <= lv2) cls = "color-danger"; else if(val <= lv1) cls = "color-warn"; }
-        ic.addClass(cls); text.addClass(cls);
+    async function getWeatherData() {
+        try {
+            const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=13.96&lon=99.64&appid=${weatherKey}&units=metric&lang=th`);
+            const wData = await wRes.json();
+            document.getElementById('ext-temp').innerText = wData.main.temp.toFixed(1) + "°C";
+            document.getElementById('ext-hum').innerText = wData.main.humidity + "%";
+            document.getElementById('ext-wind').innerText = wData.wind.speed + "m/s";
+            document.getElementById('w-icon').src = `https://openweathermap.org/img/wn/${wData.weather[0].icon}@2x.png`;
+            document.getElementById('sunrise').innerText = new Date(wData.sys.sunrise * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+            document.getElementById('sunset').innerText = new Date(wData.sys.sunset * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+
+            const uvRes = await fetch(`https://api.openweathermap.org/data/2.5/uvi?lat=13.96&lon=99.64&appid=${weatherKey}`);
+            const uvData = await uvRes.json();
+            const uvVal = Math.round(uvData.value);
+            const uvInfo = getUVLabel(uvVal);
+            document.getElementById('ext-uv').innerHTML = `${uvVal} <span style="font-size:0.5rem; color:${uvInfo.color}">(${uvInfo.text})</span>`;
+            document.getElementById('ext-uv').style.color = uvInfo.color;
+
+            const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=13.96&lon=99.64&appid=${weatherKey}`);
+            const aqiData = await aqiRes.json();
+            const aqiVal = aqiData.list[0].main.aqi;
+            const aqiInfo = getAQILabel(aqiVal);
+            document.getElementById('ext-aqi').innerHTML = `${aqiVal} <span style="font-size:0.5rem; color:${aqiInfo.color}">(${aqiInfo.text})</span>`;
+            document.getElementById('ext-aqi').style.color = aqiInfo.color;
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString('th-TH');
+        } catch (e) { }
     }
 
-    function updateVPD(val) {
-        const valTxt = $("#val-3"); const emoji = $("#emoji-vpd"); const stageTxt = $("#stage-vpd");
-        valTxt.removeClass("color-low color-safe color-warn color-danger"); stageTxt.removeClass("bg-low bg-safe bg-warn bg-danger");
-        let label = ""; let harvest = (val >= 0.4 && val <= 1.6) ? " (+เก็บเกี่ยว)" : "";
-        if (val < 0.4) { valTxt.addClass("color-low"); stageTxt.addClass("bg-low"); emoji.text("💧"); label = "ชื้นสูงเกิน"; }
-        else if (val < 0.8) { valTxt.addClass("color-low"); stageTxt.addClass("bg-low"); emoji.text("💧"); label = "ต้นกล้า" + harvest; }
-        else if (val < 1.2) { valTxt.addClass("color-safe"); stageTxt.addClass("bg-safe"); emoji.text("😊"); label = "เติบโต" + harvest; }
-        else if (val < 1.6) { valTxt.addClass("color-warn"); stageTxt.addClass("bg-warn"); emoji.text("😓"); label = "ดอก/ผล" + harvest; }
-        else if (val < 2.0) { valTxt.addClass("color-warn"); stageTxt.addClass("bg-warn"); emoji.text("😓"); label = "VPD สูง"; }
-        else { valTxt.addClass("color-danger"); stageTxt.addClass("bg-danger"); emoji.text("🔥"); label = "วิกฤตความร้อน"; }
-        stageTxt.text(label);
+    // แก้ไขการดึงข้อมูลโดยใช้ Proxy หรือการเรียกแบบไม่สน Response เพื่อลดการบล็อก
+    async function updateBlynk() {
+        try {
+            const res = await fetch(`http://${blynkServer}/${blynkAuth}/get/V1/V2/V3/V4/V5/V6/V7/V16/V10/V11/V12/V13`).catch(e => null);
+            if (!res) return;
+            const d = await res.json();
+            if (d && d.length >= 12) {
+                document.getElementById('s-temp').innerText = parseFloat(d[0]).toFixed(1);
+                document.getElementById('s-hum').innerText = d[1] + "%";
+                document.getElementById('v-moist').innerText = d[2] + "%";
+                document.getElementById('wifi-val').innerText = d[7] + " dBm";
+                updateBtnState('tap', d[8]); updateBtnState('spray', d[9]);
+                updateBtnState('fan', d[10]); updateBtnState('roof', d[11]);
+            }
+        } catch (e) { }
     }
 
-    function fetchData() {
-        $.getJSON(`https://api.thingspeak.com/channels/${tsCID}/feeds.json?api_key=${tsKey}&results=50`, function(data) {
-            let feeds = data.feeds; lastData = feeds;
-            let last = feeds[feeds.length - 1];
-            const v = (f) => parseFloat(last[f]);
-            
-            $("#val-1").text(v('field1').toFixed(1));
-            $("#val-2").text(v('field2').toFixed(0));
-            $("#val-3").text(v('field3').toFixed(2));
-            $("#val-4").text(last.field4);
-            $("#val-5").text(last.field5);
-            $("#val-6").text(last.field6);
-            $("#val-7").text(last.field7);
-            $("#val-8").text(last.field8);
-            $("#last-update").text(new Date(last.created_at).toLocaleTimeString());
-
-            applyStyle(1, v('field1'), 32, 36); 
-            applyStyle(2, v('field2'), 60, 40, true);
-            applyStyle(5, v('field5'), 800, 1200);
-            applyStyle(6, v('field6'), 200, 500); 
-            applyStyle(7, v('field7'), 20, 60);
-            applyStyle(8, v('field8'), 70, 85);
-            
-            updateSoilAnalysis(v('field4')); // วิเคราะห์ดิน
-            updateVPD(v('field3')); 
-
-            // คำนวณ Avg
-            let tT=0, tS=0, tV=0;
-            feeds.forEach(f => { tT+=parseFloat(f.field1||0); tS+=parseFloat(f.field4||0); tV+=parseFloat(f.field3||0); });
-            $("#avg-temp").text((tT/feeds.length).toFixed(1)+" °C");
-            $("#avg-soil").text((tS/feeds.length).toFixed(0)+" %");
-            $("#avg-vpd").text((tV/feeds.length).toFixed(2)+" kPa");
-
-            // Status Online Check
-            const lastT = new Date(last.created_at).getTime();
-            const diff = (new Date().getTime() - lastT) / 1000 / 60;
-            if (diff > 5) { $("#status-text").text("OFFLINE").css("color", "red"); $(".dot").addClass("offline"); }
-            else { $("#status-text").text("ONLINE").css("color", "#23C48E"); $(".dot").removeClass("offline"); }
-
-            let pT=[], pS=[], pH=[], pC=[], pV=[], pR=[];
-            feeds.forEach(f => {
-                let t = new Date(f.created_at).getTime();
-                pT.push([t, parseFloat(f.field1)]); pH.push([t, parseFloat(f.field2)]);
-                pS.push([t, parseFloat(f.field4)]); pC.push([t, parseFloat(f.field5)]);
-                pV.push([t, parseFloat(f.field6)]); pR.push([t, parseFloat(f.field7)]);
-            });
-            chart1.series[0].setData(pT); chart1.series[1].setData(pS); chart1.series[2].setData(pH);
-            chart2.series[0].setData(pC); chart2.series[1].setData(pV); chart2.series[2].setData(pR);
-        });
+    function updateBtnState(type, val) {
+        const btn = document.getElementById('btn-' + type);
+        if (val == "1") btn.classList.add('active-' + type);
+        else btn.classList.remove('active-' + type);
     }
 
-    const cfg = { chart:{type:'areaspline',backgroundColor:'transparent',height:250}, xAxis:{type:'datetime'}, credits:{enabled:false}, plotOptions:{areaspline:{fillOpacity:0.08,lineWidth:2,marker:{enabled:false}}}};
-    const chart1 = Highcharts.chart('chartEnv', { ...cfg, title:{text:'Environmental Trends'}, series:[{name:'Temp',color:'#ef4444',data:[]},{name:'Soil',color:'#22c55e',data:[]},{name:'Hum',color:'#3b82f6',data:[]}] });
-    const chart2 = Highcharts.chart('chartGas', { ...cfg, title:{text:'Gas & Rain Trends'}, series:[{name:'eCO2',color:'#64748b',data:[]},{name:'TVOC',color:'#a855f7',data:[]},{name:'Rain',color:'#0ea5e9',data:[]}] });
+    // ฟังก์ชันสั่งงานปุ่มแบบบังคับเปิด (แก้ปัญหา Google Sites บล็อก)
+    function btnClick(type) {
+        if(type === 'tap' && isAuto) return alert("โปรดเปลี่ยนเป็น Manual");
+        const btn = document.getElementById('btn-'+type);
+        const newVal = btn.classList.contains('active-'+type) ? "0" : "1";
+        const vPin = {tap:"V10", spray:"V11", fan:"V12", roof:"V13"}[type];
+        
+        const url = `http://${blynkServer}/${blynkAuth}/update/${vPin}?value=${newVal}`;
+        
+        // วิธีแก้ตายตัว: เปิดหน้าต่างใหม่ขนาดจิ๋วแล้วปิดทันที
+        const win = window.open(url, "blynk_update", "width=1,height=1,left=10000,top=10000");
+        setTimeout(() => { if(win) win.close(); }, 500);
 
-    setInterval(fetchData, 15000);
-    fetchData();
-    updateButtonUI();
+        // เปลี่ยนสีปุ่มที่หน้าจอทันที
+        if(newVal === "1") btn.classList.add('active-'+type);
+        else btn.classList.remove('active-'+type);
+    }
+
+    getWeatherData(); updateBlynk();
+    setInterval(updateBlynk, 3000);
+    setInterval(getWeatherData, 600000);
 </script>
-<footer class="mt-12 py-4 text-center text-sm text-gray-500 border-t">
-        <p>Smart Farm Dashboard - Powered by Suchin & Prompt AI</p>
-    </footer>
 </body>
 </html>
