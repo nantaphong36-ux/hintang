@@ -48,6 +48,10 @@
         .mode-active { background: var(--safe); border: none; font-weight: 600; }
 
         .footer { margin-top: auto; padding: 15px 10px; text-align: center; font-size: 0.6rem; opacity: 0.6; line-height: 1.6; }
+        
+        /* สไตล์ชื่อที่ตั้งและเมฆ */
+        .loc-name { color: white; font-weight: 600; font-size: 0.9rem; }
+        .cloud-desc { color: #00d2ff; font-size: 0.8rem; }
     </style>
 </head>
 <body class="dark-mode">
@@ -62,10 +66,13 @@
         </div>
     </div>
 
-    <div class="glass-card">
+    <div class="glass-card" style="text-align: center;">
         <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
             <img id="w-icon" src="https://openweathermap.org/img/wn/01d@2x.png" width="75">
             <div id="ext-temp" style="font-size:2.8rem; font-weight:600;">--°C</div>
+        </div>
+        <div style="margin-top: -5px; margin-bottom: 10px;">
+            <span class="loc-name">ท่าม่วง, </span><span id="w-desc" class="cloud-desc">กำลังโหลด...</span>
         </div>
         <div class="weather-sub">
             <div><span style="opacity:0.7">💧 ชื้นอากาศ</span><b id="ext-hum">--%</b></div>
@@ -105,13 +112,12 @@
     </div>
 </div>
 
-<iframe id="blynk-frame" style="display:none;"></iframe>
-
 <script>
     let isAuto = true;
     const blynkAuth = "qXn6VGKqQTkrteXQPIw66e97JkdKlg-u";
     const blynkServer = "159.65.131.215:8080";
     const weatherKey = "02868cd5e15cf0f70bfe001a9822c367";
+    const lat = 13.91; const lon = 99.64;
 
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
@@ -139,37 +145,49 @@
 
     async function getWeatherData() {
         try {
-            const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=13.96&lon=99.64&appid=${weatherKey}&units=metric&lang=th`);
+            const cacheBuster = new Date().getTime();
+            const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherKey}&units=metric&lang=th&_=${cacheBuster}`);
             const wData = await wRes.json();
+            
             document.getElementById('ext-temp').innerText = wData.main.temp.toFixed(1) + "°C";
             document.getElementById('ext-hum').innerText = wData.main.humidity + "%";
             document.getElementById('ext-wind').innerText = wData.wind.speed + "m/s";
+            document.getElementById('w-desc').innerText = wData.weather[0].description;
             document.getElementById('w-icon').src = `https://openweathermap.org/img/wn/${wData.weather[0].icon}@2x.png`;
             document.getElementById('sunrise').innerText = new Date(wData.sys.sunrise * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
             document.getElementById('sunset').innerText = new Date(wData.sys.sunset * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
 
-            const uvRes = await fetch(`https://api.openweathermap.org/data/2.5/uvi?lat=13.96&lon=99.64&appid=${weatherKey}`);
+            const uvRes = await fetch(`https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${weatherKey}&_=${cacheBuster}`);
             const uvData = await uvRes.json();
-            const uvVal = Math.round(uvData.value);
-            const uvInfo = getUVLabel(uvVal);
-            document.getElementById('ext-uv').innerHTML = `${uvVal} <span style="font-size:0.5rem; color:${uvInfo.color}">(${uvInfo.text})</span>`;
+            let uvVal = uvData.value;
+            
+            // ระบบตรวจสอบเวลาพระอาทิตย์ตก
+            const now = new Date().getTime() / 1000;
+            if (now > wData.sys.sunset || now < wData.sys.sunrise) {
+                uvVal = 0; // มืดแล้ว UV ต้องเป็น 0
+            } else if (now > wData.sys.sunset - 3600) {
+                uvVal = uvVal * 0.2; // 1 ชั่วโมงก่อนตกดิน UV จะลดลงฮวบฮาบ
+            }
+
+            const uvInfo = getUVLabel(Math.round(uvVal));
+            document.getElementById('ext-uv').innerHTML = `${Math.round(uvVal)} <span style="font-size:0.5rem; color:${uvInfo.color}">(${uvInfo.text})</span>`;
             document.getElementById('ext-uv').style.color = uvInfo.color;
 
-            const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=13.96&lon=99.64&appid=${weatherKey}`);
+            const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${weatherKey}&_=${cacheBuster}`);
             const aqiData = await aqiRes.json();
             const aqiVal = aqiData.list[0].main.aqi;
             const aqiInfo = getAQILabel(aqiVal);
             document.getElementById('ext-aqi').innerHTML = `${aqiVal} <span style="font-size:0.5rem; color:${aqiInfo.color}">(${aqiInfo.text})</span>`;
             document.getElementById('ext-aqi').style.color = aqiInfo.color;
+
             document.getElementById('last-update').innerText = new Date().toLocaleTimeString('th-TH');
         } catch (e) { }
     }
 
-    // แก้ไขการดึงข้อมูลโดยใช้ Proxy หรือการเรียกแบบไม่สน Response เพื่อลดการบล็อก
     async function updateBlynk() {
         try {
-            const res = await fetch(`http://${blynkServer}/${blynkAuth}/get/V1/V2/V3/V4/V5/V6/V7/V16/V10/V11/V12/V13`).catch(e => null);
-            if (!res) return;
+            const res = await fetch(`http://${blynkServer}/${blynkAuth}/get/V1/V2/V3/V4/V5/V6/V7/V16/V10/V11/V12/V13`).catch(() => null);
+            if(!res) return;
             const d = await res.json();
             if (d && d.length >= 12) {
                 document.getElementById('s-temp').innerText = parseFloat(d[0]).toFixed(1);
@@ -188,20 +206,14 @@
         else btn.classList.remove('active-' + type);
     }
 
-    // ฟังก์ชันสั่งงานปุ่มแบบบังคับเปิด (แก้ปัญหา Google Sites บล็อก)
     function btnClick(type) {
         if(type === 'tap' && isAuto) return alert("โปรดเปลี่ยนเป็น Manual");
         const btn = document.getElementById('btn-'+type);
         const newVal = btn.classList.contains('active-'+type) ? "0" : "1";
         const vPin = {tap:"V10", spray:"V11", fan:"V12", roof:"V13"}[type];
-        
         const url = `http://${blynkServer}/${blynkAuth}/update/${vPin}?value=${newVal}`;
-        
-        // วิธีแก้ตายตัว: เปิดหน้าต่างใหม่ขนาดจิ๋วแล้วปิดทันที
-        const win = window.open(url, "blynk_update", "width=1,height=1,left=10000,top=10000");
+        const win = window.open(url, "blynk_proc", "width=1,height=1,left=10000,top=10000");
         setTimeout(() => { if(win) win.close(); }, 500);
-
-        // เปลี่ยนสีปุ่มที่หน้าจอทันที
         if(newVal === "1") btn.classList.add('active-'+type);
         else btn.classList.remove('active-'+type);
     }
